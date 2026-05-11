@@ -1,0 +1,24 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "sqlproj: Build Recetas",
+			"type": "process",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"/home/geanfranco/Documentos/uni/moviles/Recetas/Recetas.sqlproj",
+				"/p:NetCoreBuild=true",
+				"/p:NETCoreTargetsPath=/home/geanfranco/.vscode/extensions/ms-mssql.sql-database-projects-vscode-1.5.9/BuildDirectory",
+				"/p:SystemDacpacsLocation=/home/geanfranco/.vscode/extensions/ms-mssql.sql-database-projects-vscode-1.5.9/BuildDirectory"
+			],
+			"problemMatcher": "$sqlproj-problem-matcher",
+			"isBackground": true,
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"detail": "Compile el proyecto Recetas de SQL"
+		}
+	]
+}

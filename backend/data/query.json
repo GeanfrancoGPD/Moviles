@@ -1,0 +1,122 @@
+{
+  "getUsers": {
+    "query": "SELECT id, nombre, gmail AS email FROM usuarios ORDER BY id",
+    "structure_params": {},
+    "orderArray": []
+  },
+  "getUser": {
+    "query": "SELECT id, nombre, gmail AS email, password FROM usuarios WHERE gmail = $1",
+    "structure_params": {
+      "gmail": "string"
+    },
+    "orderArray": [
+      "gmail"
+    ]
+  },
+  "getUserById": {
+    "query": "SELECT id, nombre, gmail AS email FROM usuarios WHERE id = $1",
+    "structure_params": {
+      "id": "number"
+    },
+    "orderArray": [
+      "id"
+    ]
+  },
+  "createUser": {
+    "query": "INSERT INTO usuarios (nombre, gmail, password) VALUES ($1, $2, $3) RETURNING id, nombre, gmail AS email",
+    "structure_params": {
+      "nombre": "string",
+      "gmail": "string",
+      "password": "string"
+    },
+    "orderArray": [
+      "nombre",
+      "gmail",
+      "password"
+    ]
+  },
+  "updateUser": {
+    "query": "UPDATE usuarios SET nombre = $1, gmail = $2, password = $3 WHERE id = $4 RETURNING id, nombre, gmail AS email",
+    "structure_params": {
+      "nombre": "string",
+      "gmail": "string",
+      "password": "string",
+      "id": "number"
+    },
+    "orderArray": [
+      "nombre",
+      "gmail",
+      "password",
+      "id"
+    ]
+  },
+  "deleteUser": {
+    "query": "DELETE FROM usuarios WHERE id = $1 RETURNING id, nombre, gmail AS email",
+    "structure_params": {
+      "id": "number"
+    },
+    "orderArray": [
+      "id"
+    ]
+  },
+  "getNotas": {
+    "query": "SELECT n.id, n.titulo, n.contenido, n.usuario_id, u.nombre AS usuario_nombre, u.gmail AS usuario_email FROM notas n INNER JOIN usuarios u ON u.id = n.usuario_id ORDER BY n.id",
+    "structure_params": {},
+    "orderArray": []
+  },
+  "getNotaById": {
+    "query": "SELECT n.id, n.titulo, n.contenido, n.usuario_id, u.nombre AS usuario_nombre, u.gmail AS usuario_email FROM notas n INNER JOIN usuarios u ON u.id = n.usuario_id WHERE n.id = $1",
+    "structure_params": {
+      "id": "number"
+    },
+    "orderArray": [
+      "id"
+    ]
+  },
+  "getNotasByUsuario": {
+    "query": "SELECT id, titulo, contenido, usuario_id FROM notas WHERE usuario_id = $1 ORDER BY id",
+    "structure_params": {
+      "usuario_id": "number"
+    },
+    "orderArray": [
+      "usuario_id"
+    ]
+  },
+  "createNota": {
+    "query": "INSERT INTO notas (titulo, contenido, usuario_id) VALUES ($1, $2, $3) RETURNING id, titulo, contenido, usuario_id",
+    "structure_params": {
+      "titulo": "string",
+      "contenido": "string",
+      "usuario_id": "number"
+    },
+    "orderArray": [
+      "titulo",
+      "contenido",
+      "usuario_id"
+    ]
+  },
+  "updateNota": {
+    "query": "UPDATE notas SET titulo = $1, contenido = $2, usuario_id = $3 WHERE id = $4 RETURNING id, titulo, contenido, usuario_id",
+    "structure_params": {
+      "titulo": "string",
+      "contenido": "string",
+      "usuario_id": "number",
+      "id": "number"
+    },
+    "orderArray": [
+      "titulo",
+      "contenido",
+      "usuario_id",
+      "id"
+    ]
+  },
+  "deleteNota": {
+    "query": "DELETE FROM notas WHERE id = $1 RETURNING id, titulo, contenido, usuario_id",
+    "structure_params": {
+      "id": "number"
+    },
+    "orderArray": [
+      "id"
+    ]
+  }
+}
