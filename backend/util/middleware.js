@@ -10,20 +10,10 @@ app.set("trust proxy", 1);
 // --- CORS global ---
 app.use(
   cors({
-    origin: (origin, callback) => {
-      const allowed = [
-        "https://localhost",
-        "http://localhost:5000",
-      ];
-
-      if (!origin || allowed.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: "http://localhost:8081", // El puerto exacto de tu frontend
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
-  })
+  }),
 );
 
 // JSON
@@ -41,7 +31,7 @@ app.use(
       sameSite: "none",
       maxAge: 1000 * 60 * 60,
     },
-  })
+  }),
 );
 
 export default app;

@@ -16,7 +16,45 @@ import Card from "../molecules/Card";
 const imageUri =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuCi1BRrDqNfPWjt1gBro2agzG7k2-5XE4X6lIikweuiChxIgNZSAd_xFZAcU9VYCCfqwAv7qE0LFAyLz4pQxtCl8paK5N2xWB2Aa9hTjVNgC6RkMGxLOJxyZpVF80zQNBnZDcWX-5R37D1F652k9DwIuLFN33Kavrr6A_fvIWVw-8QqJMSz3z8ktxe4eBPUtGNQ5I0Wu65SCbGq3STHyrocHzdTlHfGJfTtTN9OfeIlQsBCmLvpt7quFiJxpadIJqGaxGTN7Ov1zGoE";
 
-export default function Login() {
+export default function Login({ navigation }) {
+  const [gmail, setgmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [errorMessage, setErrorMessage] = React.useState("");
+
+  const handleLogin = () => {
+    setErrorMessage("");
+
+    if (!gmail || !password) {
+      setErrorMessage("Por favor, ingresa tu correo y contraseña.");
+      return;
+    }
+
+    console.log("Campos validados correctamente. Enviando a la API...");
+    console.log("datos:", gmail, password);
+
+    fetch("http://localhost:5000/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify({
+        gmail: gmail,
+        password: password,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Respuesta de la API:", data);
+        // Manejar la respuesta de la API aquí
+      })
+      .catch((error) => {
+        console.error("Error al iniciar sesión:", error);
+        setErrorMessage(
+          "Error al iniciar sesión. Por favor, inténtalo de nuevo.",
+        );
+      });
+  };
   return (
     <SafeAreaView style={styles.container}>
       <ImageBackground source={{ uri: imageUri }} style={styles.image}>
@@ -39,13 +77,31 @@ export default function Login() {
               placeholder="Correo electrónico"
               keyboardType="email-address"
               type="email"
+              value={gmail}
               autoCapitalize="none"
+              onChangeText={setgmail}
             />
 
-            <Input placeholder="Contraseña" type="password" />
+            <Input
+              placeholder="Contraseña"
+              type="password"
+              value={password}
+              onChangeText={setPassword}
+            />
 
-            <Button title="Entrar" onPress={() => {}} />
+            <Button
+              title="Entrar"
+              onPress={() => {
+                handleLogin();
+              }}
+            />
 
+            <Text
+              style={styles.footerText}
+              onPress={() => navigation.navigate("Register")}
+            >
+              ¿No tienes cuenta?
+            </Text>
             <Text style={styles.footerText}>¿Olvidaste tu contraseña?</Text>
           </Card>
         </ScrollView>

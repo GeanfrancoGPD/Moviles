@@ -25,7 +25,7 @@ export class Dispatcher {
     this.app.post("/api/register", async (req, res) => {
       await this.registerUser({ request: req, response: res });
     });
-    
+
     this.app.post("/api/logout", (req, res) => {
       this.destroy({ request: req, response: res });
     });
@@ -40,26 +40,22 @@ export class Dispatcher {
   }
 
   async login(sessionObject) {
-    const { email, password } = sessionObject.request.body;
+    const { gmail, password } = sessionObject.request.body;
 
-    if (!email || !password) {
+    if (!gmail || !password) {
       return sessionObject.response.status(400).json({
         success: false,
-        message: "Email y contraseña son requeridos",
+        message: "Correo electrónico y contraseña son requeridos",
       });
     }
 
-    if (!this.validator.validateEmail(email)) {
+    if (!this.validator.validateEmail(gmail)) {
       return sessionObject.response.status(400).json({
         success: false,
         mensaje: "",
       });
     }
-    const user = await this.DBPool.executeQuery(
-      "getUser",
-      [email]
-    );
-
+    const user = await this.DBPool.excecuteNameQuery("getUser", { gmail });
     if (user.length === 0) {
       return sessionObject.response
         .status(401)
@@ -68,7 +64,7 @@ export class Dispatcher {
 
     const isPasswordValid = await this.utilBycript.compare(
       password,
-      user[0].password
+      user[0].password,
     );
 
     if (!isPasswordValid) {
@@ -82,36 +78,21 @@ export class Dispatcher {
   }
 
   async registerUser(sessionObject) {
-    const { nombre, email, password, tipo_usuario } =
-      sessionObject.request.body;
+    const { nombre, gmail, password } = sessionObject.request.body;
+    console.log("datos:", nombre, gmail, password);
 
-    if (!email || !password || !nombre) {
+    if (!gmail || !password || !nombre) {
       return sessionObject.response.status(402).json({
         success: false,
         message: "Todos los datos son requeridos",
       });
     }
 
-    // Si no se especifica tipo_usuario, usar el ID del tipo "Cliente"
-    let tipoFinal = tipo_usuario;
-    if (!tipo_usuario) {
-      const tipoCliente = await this.DBPool.executeQuery(
-        "SELECT id_tipo_usuario FROM Tipos_usuario WHERE de_tipo_usuario = 'Cliente'"
-      );
-      if (tipoCliente.length === 0) {
-        return sessionObject.response.status(500).json({
-          success: false,
-          message: "No se encontró el tipo de usuario 'Cliente'",
-        });
-      }
-      tipoFinal = tipoCliente[0].id_tipo_usuario;
-    }
-
     const hashedPassword = await this.utilBycript.hash(password);
 
     await this.DBPool.executeQuery(
-      "INSERT INTO usuario (nombre, email, password, id_tipo_usuario) VALUES ($1, $2, $3, $4)",
-      [nombre, email, hashedPassword, tipoFinal]
+      "INSERT INTO usuarios (nombre, gmail, password) VALUES ($1, $2, $3)",
+      [nombre, gmail, hashedPassword],
     );
 
     sessionObject.response.json({
@@ -147,5 +128,4 @@ export class Dispatcher {
   destroy(sessionObject) {
     this.sessionComponent.destroySession(sessionObject);
   }
-
 }

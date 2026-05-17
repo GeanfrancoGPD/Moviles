@@ -1,0 +1,206 @@
+import React, { useState } from "react";
+import {
+  ImageBackground,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import Input from "../atom/Inputs";
+import Button from "../atom/Button";
+import Card from "../molecules/Card";
+
+const imageUri =
+  "https://lh3.googleusercontent.com/aida-public/AB6AXuCi1BRrDqNfPWjt1gBro2agzG7k2-5XE4X6lIikweuiChxIgNZSAd_xFZAcU9VYCCfqwAv7qE0LFAyLz4pQxtCl8paK5N2xWB2Aa9hTjVNgC6RkMGxLOJxyZpVF80zQNBnZDcWX-5R37D1F652k9DwIuLFN33Kavrr6A_fvIWVw-8QqJMSz3z8ktxe4eBPUtGNQ5I0Wu65SCbGq3STHyrocHzdTlHfGJfTtTN9OfeIlQsBCmLvpt7quFiJxpadIJqGaxGTN7Ov1zGoE";
+
+export default function Register({ navigation }) {
+  const [gmail, setgmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [name, setName] = useState("");
+
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleRegister = () => {
+    // Limpiamos errores previos al presionar
+    setErrorMessage("");
+
+    // Validar campos vacíos
+    if (!name || !gmail || !password || !confirmPassword) {
+      setErrorMessage("Por favor, rellena todos los campos.");
+      return;
+    }
+
+    // Validar contraseñas
+    if (password !== confirmPassword) {
+      setErrorMessage("Las contraseñas no coinciden.");
+      return;
+    }
+
+    console.log("Campos validados correctamente. Enviando a la API...");
+    fetch("http://localhost:5000/api/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        nombre: name,
+        gmail: gmail,
+        password: password,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Respuesta de la API:", data);
+        // Manejar la respuesta de la API aquí
+      })
+      .catch((error) => {
+        console.error("Error al registrar:", error);
+        setErrorMessage("Error al registrar. Por favor, inténtalo de nuevo.");
+      });
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ImageBackground source={{ uri: imageUri }} style={styles.image}>
+        <View style={styles.overlay} />
+        <ScrollView
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="always" // Cambiado a 'always' para evitar problemas de clicks en Web
+        >
+          <View style={styles.hero}>
+            <Text style={styles.kicker}>Comienza aquí</Text>
+            <Text style={styles.title}>Crea tu cuenta</Text>
+            <Text style={styles.subtitle}>
+              Regístrate para guardar y compartir tus recetas favoritas.
+            </Text>
+          </View>
+
+          <Card title="Registro">
+            {/* 2. Si hay un error, mostramos este banner rojo tipo Toast */}
+            {errorMessage ? (
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>{errorMessage}</Text>
+              </View>
+            ) : (
+              <View style={styles.successContainer}>
+                <Text style={styles.successText}>Registro exitoso!</Text>
+              </View>
+            )}
+            {/* Si no hay error, dejamos un espacio para que no salte el diseño */}
+            <Input
+              placeholder="Nombre completo"
+              autoCapitalize="words"
+              value={name}
+              onChangeText={setName}
+            />
+            <Input
+              placeholder="Correo electrónico"
+              keyboardType="gmail-address"
+              type="gmail"
+              autoCapitalize="none"
+              value={gmail}
+              onChangeText={setgmail}
+            />
+            <Input
+              placeholder="Contraseña"
+              type="password"
+              value={password}
+              onChangeText={setPassword}
+            />
+            <Input
+              placeholder="Confirmar contraseña"
+              type="password"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+            />
+            <Button title="Registrarse" onPress={handleRegister} />
+            <Text
+              style={styles.footerText}
+              onPress={() => navigation.navigate("Login")}
+            >
+              ¿Ya tienes cuenta? <Text style={styles.link}>Iniciar sesión</Text>
+            </Text>
+          </Card>
+        </ScrollView>
+      </ImageBackground>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#111111",
+  },
+  image: {
+    flex: 1,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(12, 12, 12, 0.62)",
+  },
+  content: {
+    flexGrow: 1,
+    justifyContent: "center",
+    paddingHorizontal: 24,
+    paddingVertical: 40,
+  },
+  hero: {
+    marginBottom: 24,
+  },
+  kicker: {
+    color: "#F4C95D",
+    fontSize: 14,
+    fontWeight: "700",
+    letterSpacing: 1.4,
+    textTransform: "uppercase",
+    marginBottom: 10,
+  },
+  title: {
+    color: "#FFFFFF",
+    fontSize: 34,
+    lineHeight: 40,
+    fontWeight: "800",
+    maxWidth: 320,
+  },
+  subtitle: {
+    color: "rgba(255, 255, 255, 0.82)",
+    fontSize: 16,
+    lineHeight: 24,
+    marginTop: 12,
+    maxWidth: 340,
+  },
+  // Estilos para el nuevo mensaje de error (estilo Toast dentro del Card)
+  errorContainer: {
+    backgroundColor: "rgba(255, 75, 75, 0.15)",
+    borderColor: "rgba(255, 75, 75, 0.3)",
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+  },
+  errorText: {
+    color: "#FF4B4B",
+    fontSize: 14,
+    textAlign: "center",
+    fontWeight: "500",
+  },
+  successText: {
+    color: "#17f647",
+    fontSize: 14,
+    textAlign: "center",
+    fontWeight: "500",
+  },
+  footerText: {
+    color: "rgba(255, 255, 255, 0.78)",
+    textAlign: "center",
+    fontSize: 13,
+    marginTop: 16,
+  },
+  link: {
+    color: "#F4C95D",
+    fontWeight: "600",
+  },
+});

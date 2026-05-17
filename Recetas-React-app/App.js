@@ -3,7 +3,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 
 import BarraNavegacion from "./components/molecules/BarraNavegacion";
 import Login from "./components/pages/Login";
-
+import Register from "./components/pages/Register";
 const Stack = createStackNavigator();
 
 const linking = {
@@ -26,6 +26,7 @@ export default function App() {
         }}
       >
         <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="Register" component={Register} />
         <Stack.Screen name="Home" component={BarraNavegacion} />
       </Stack.Navigator>
     </NavigationContainer>

@@ -1,7 +1,7 @@
 import { Pool } from "pg";
 import fs from "fs";
 import { log } from "console";
-import dotenv  from "dotenv";
+import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -9,7 +9,7 @@ export class DB {
   constructor() {}
 
   async init() {
-    try{
+    try {
       this.pool = new Pool({
         user: process.env.DB_USER,
         host: process.env.DB_HOST,
@@ -27,10 +27,10 @@ export class DB {
       console.log("Conexión exitosa a PostgreSQL");
 
       client.release();
-    }catch(error){
+    } catch (error) {
       console.error("Error al inicializar la base de datos:", error);
     }
-    
+
     this.loadQueries();
   }
 
@@ -50,15 +50,21 @@ export class DB {
 
   async excecuteNameQuery(nameQuery, params = {}) {
     try {
-      const query = this.queries[nameQuery].query;
-      const values = Object.values(params);
+      const queryConfig = this.queries[nameQuery];
+
+      // DEBUG: Mira qué sale aquí. Si sale "undefined", ahí está el problema.
+      console.log("Query encontrada:", queryConfig);
+
+      const query = queryConfig.query;
+      const values = queryConfig.orderArray.map((key) => params[key]);
+
+      // DEBUG: Esto es lo que realmente ve la base de datos
+      console.log("Enviando a SQL:", query);
 
       const result = await this.pool.query(query, values);
-      console.log("resultado:", result.rows);
-
       return result.rows;
     } catch (error) {
-      console.error("Error no se encuentra la consulta:", error);
+      console.error("Error detallado:", error);
     }
   }
 }
