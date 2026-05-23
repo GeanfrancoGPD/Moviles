@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import GroupList from './GroupList';
+import GroupList from '../molecules/GroupList';
 import { useAuth } from '../context/AuthContext';
 import { getUserGroups } from '../../services/api';
 

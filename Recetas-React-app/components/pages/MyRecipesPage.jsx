@@ -3,7 +3,7 @@ import { View, StyleSheet, Text } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { getUserRecipes } from '../../services/api';
 import { useAuth } from '../context/AuthContext';
-import RecipeList from './RecipeList';
+import RecipeList from '../molecules/RecipeList';
 import Button from '../atom/Button';
 
 export default function MyRecipesPage({ navigation }) {

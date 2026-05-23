@@ -1,10 +1,10 @@
 import React from 'react';
 import { FlatList, View, StyleSheet, Text } from 'react-native';
-import GroupCard from '../molecules/GroupCard';
+import GroupCard from './GroupCard';
 
-export default function GroupList({ 
-  groups, 
-  onGroupPress, 
+export default function GroupList({
+  groups,
+  onGroupPress,
   onGroupDelete,
   emptyMessage = 'No hay grupos creados',
 }) {

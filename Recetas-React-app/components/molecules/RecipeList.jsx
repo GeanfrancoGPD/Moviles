@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { FlatList, View, StyleSheet, RefreshControl, Text } from 'react-native';
-import RecipeCard from '../molecules/RecipeCard';
+import RecipeCard from './RecipeCard';
 import LoadingSpinner from '../atom/LoadingSpinner';
 
-export default function RecipeList({ 
-  recipes, 
-  loading = false, 
-  onRefresh, 
+export default function RecipeList({
+  recipes,
+  loading = false,
+  onRefresh,
   onRecipePress,
   emptyMessage = 'No hay recetas disponibles',
 }) {

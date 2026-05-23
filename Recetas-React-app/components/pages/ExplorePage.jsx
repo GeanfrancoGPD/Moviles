@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { getPublicRecipes } from '../../services/api';
 import { useAuth } from '../context/AuthContext';
-import RecipeList from './RecipeList';
+import RecipeList from '../molecules/RecipeList';
 
 export default function ExplorePage({ navigation }) {
   const { user } = useAuth();
