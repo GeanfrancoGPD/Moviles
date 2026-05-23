@@ -4,12 +4,16 @@ export class Session{
     }
 
     async createSession(sessionObject, user){
-        console.log('Creando sesión para usuario:', user[0].email);
+        const dbUser = user?.[0] ?? {};
+        const email = dbUser.email ?? dbUser.gmail ?? '';
+        const name = dbUser.name ?? dbUser.nombre ?? '';
+
+        console.log('Creando sesión para usuario:', email);
 
         sessionObject.request.session.user = {
-            id: user[0].id,
-            email: user[0].email,
-            name: user[0].name
+            id: dbUser.id,
+            email,
+            name
         }
 
         console.log('Sesión creada:', sessionObject.request.session.user);

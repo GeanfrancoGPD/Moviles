@@ -50,6 +50,7 @@ export class DB {
 
   async excecuteNameQuery(nameQuery, params = {}) {
     try {
+      await this.loadQueries();
       const queryConfig = this.queries[nameQuery];
 
       // DEBUG: Mira qué sale aquí. Si sale "undefined", ahí está el problema.
@@ -67,4 +68,12 @@ export class DB {
       console.error("Error detallado:", error);
     }
   }
+
+  async close() {
+    if (this.pool) {
+      await this.pool.end();
+      console.log("Conexión a BD cerrada");
+    }
+  }
+  
 }

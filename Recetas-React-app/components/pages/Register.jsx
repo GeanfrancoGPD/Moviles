@@ -19,20 +19,16 @@ export default function Register({ navigation }) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
-
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleRegister = () => {
-    // Limpiamos errores previos al presionar
     setErrorMessage("");
 
-    // Validar campos vacíos
     if (!name || !gmail || !password || !confirmPassword) {
       setErrorMessage("Por favor, rellena todos los campos.");
       return;
     }
 
-    // Validar contraseñas
     if (password !== confirmPassword) {
       setErrorMessage("Las contraseñas no coinciden.");
       return;
@@ -44,16 +40,23 @@ export default function Register({ navigation }) {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify({
         nombre: name,
         gmail: gmail,
+        email: gmail,
         password: password,
       }),
     })
       .then((response) => response.json())
       .then((data) => {
         console.log("Respuesta de la API:", data);
-        // Manejar la respuesta de la API aquí
+        if (data.success) {
+          // Redirige al login tras registro exitoso
+          navigation.replace("Login");
+        } else {
+          setErrorMessage(data.message || "Error al registrar");
+        }
       })
       .catch((error) => {
         console.error("Error al registrar:", error);
@@ -67,7 +70,8 @@ export default function Register({ navigation }) {
         <View style={styles.overlay} />
         <ScrollView
           contentContainerStyle={styles.content}
-          keyboardShouldPersistTaps="always" // Cambiado a 'always' para evitar problemas de clicks en Web
+          keyboardShouldPersistTaps="always"
+          showsVerticalScrollIndicator
         >
           <View style={styles.hero}>
             <Text style={styles.kicker}>Comienza aquí</Text>
@@ -78,17 +82,12 @@ export default function Register({ navigation }) {
           </View>
 
           <Card title="Registro">
-            {/* 2. Si hay un error, mostramos este banner rojo tipo Toast */}
             {errorMessage ? (
               <View style={styles.errorContainer}>
                 <Text style={styles.errorText}>{errorMessage}</Text>
               </View>
-            ) : (
-              <View style={styles.successContainer}>
-                <Text style={styles.successText}>Registro exitoso!</Text>
-              </View>
-            )}
-            {/* Si no hay error, dejamos un espacio para que no salte el diseño */}
+            ) : null}
+
             <Input
               placeholder="Nombre completo"
               autoCapitalize="words"
@@ -97,8 +96,8 @@ export default function Register({ navigation }) {
             />
             <Input
               placeholder="Correo electrónico"
-              keyboardType="gmail-address"
-              type="gmail"
+              keyboardType="email-address"
+              type="email"
               autoCapitalize="none"
               value={gmail}
               onChangeText={setgmail}
@@ -172,7 +171,6 @@ const styles = StyleSheet.create({
     marginTop: 12,
     maxWidth: 340,
   },
-  // Estilos para el nuevo mensaje de error (estilo Toast dentro del Card)
   errorContainer: {
     backgroundColor: "rgba(255, 75, 75, 0.15)",
     borderColor: "rgba(255, 75, 75, 0.3)",
@@ -183,12 +181,6 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: "#FF4B4B",
-    fontSize: 14,
-    textAlign: "center",
-    fontWeight: "500",
-  },
-  successText: {
-    color: "#17f647",
     fontSize: 14,
     textAlign: "center",
     fontWeight: "500",

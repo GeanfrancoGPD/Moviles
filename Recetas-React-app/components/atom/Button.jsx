@@ -15,14 +15,14 @@ export default function Button({ title, onPress }) {
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: "#F4C95D",
+    backgroundColor: "#0B5D3C",
     borderRadius: 16,
     alignItems: "center",
     paddingVertical: 15,
     marginTop: 2,
   },
   buttonText: {
-    color: "#1B1B1B",
+    color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "800",
   },
