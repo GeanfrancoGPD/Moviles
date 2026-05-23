@@ -49,12 +49,24 @@ export class Dispatcher {
       });
     }
 
-    if (!this.validator.validateEmail(gmail)) {
+    const emailValidation = await this.validator.validateEmail(gmail);
+
+    if (!emailValidation.success) {
       return sessionObject.response.status(400).json({
         success: false,
-        mensaje: "",
+        message: "Correo electrónico inválido",
       });
     }
+
+    const passwordValidation = await this.validator.validatePassword(password);
+
+    if (!passwordValidation.success) {
+      return sessionObject.response.status(400).json({
+        success: false,
+        message: passwordValidation.error.issues[0].message,
+      });
+    }
+
     const user = await this.DBPool.excecuteNameQuery("getUser", { gmail });
     if (user.length === 0) {
       return sessionObject.response
@@ -85,6 +97,43 @@ export class Dispatcher {
       return sessionObject.response.status(402).json({
         success: false,
         message: "Todos los datos son requeridos",
+      });
+    }
+
+    const nameValidation = await this.validator.validateUsername(nombre);
+
+    if (!nameValidation.success) {
+      return sessionObject.response.status(400).json({
+        success: false,
+        message: nameValidation.error.issues[0].message,
+      });
+    }
+
+    const emailValidation = await this.validator.validateEmail(gmail);
+
+    if (!emailValidation.success) {
+      return sessionObject.response.status(400).json({
+        success: false,
+        message: "Correo electrónico inválido",
+      });
+    }
+
+    const passwordValidation = await this.validator.validatePassword(password);
+
+    if (!passwordValidation.success) {
+      return sessionObject.response.status(400).json({
+        success: false,
+        message: passwordValidation.error.issues[0].message,
+      });
+    }
+
+    const existingUser = await this.DBPool.excecuteNameQuery("getUser", {
+      gmail,
+    });
+    if (existingUser.length > 0) {
+      return sessionObject.response.status(409).json({
+        success: false,
+        message: "El correo electrónico ya está registrado",
       });
     }
 

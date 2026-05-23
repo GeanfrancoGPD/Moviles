@@ -10,9 +10,8 @@ export default class Validator {
   async validatePassword(password) {
     const passwordSchema = zod
       .string()
-      .password()
-      .min(8)
-      .max(64)
+      .min(4, "La contraseña debe tener al menos 4 caracteres")
+      .max(64, "La contraseña no puede exceder los 64 caracteres")
       .regex(/[A-Z]/, "Debe contener al menos una letra mayúscula")
       .regex(/[a-z]/, "Debe contener al menos una letra minúscula")
       .regex(/[0-9]/, "Debe contener al menos un número")
@@ -27,7 +26,7 @@ export default class Validator {
       .max(30, "El nombre de usuario no puede exceder los 30 caracteres")
       .regex(
         /^[a-zA-Z0-9_]+$/,
-        "El nombre de usuario solo puede contener letras, números y guiones bajos"
+        "El nombre de usuario solo puede contener letras, números y guiones bajos",
       );
     return usernameSchema.safeParse(username);
   }
@@ -38,7 +37,7 @@ export default class Validator {
       .length(6, "El token debe tener exactamente 6 caracteres")
       .regex(
         /^[A-Z0-9]+$/,
-        "El token solo puede contener letras mayúsculas y números"
+        "El token solo puede contener letras mayúsculas y números",
       );
     return tokenSchema.safeParse(token);
   }

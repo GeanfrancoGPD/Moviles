@@ -13,6 +13,9 @@ export default function Input({
   keyboardType,
   value,
   onChangeText,
+  onFocus,
+  onBlur,
+  ...restProps
 }) {
   // Estado para controlar si se muestra el texto o se oculta con asteriscos
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -27,7 +30,11 @@ export default function Input({
         // Si es password y "isPasswordVisible" es falso, se oculta el texto
         secureTextEntry={type === "password" && !isPasswordVisible}
         value={value}
+        maxLength={30}
         onChangeText={onChangeText}
+        onFocus={onFocus}
+        onBlur={onBlur}
+        {...restProps}
       />
 
       {/* Solo mostramos el ojito si el tipo de input es "password" */}

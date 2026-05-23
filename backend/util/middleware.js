@@ -10,7 +10,7 @@ app.set("trust proxy", 1);
 // --- CORS global ---
 app.use(
   cors({
-    origin: "http://localhost:8081", // El puerto exacto de tu frontend
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   }),

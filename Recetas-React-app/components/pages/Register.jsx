@@ -6,10 +6,14 @@ import {
   StyleSheet,
   Text,
   View,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import Input from "../atom/Inputs";
 import Button from "../atom/Button";
 import Card from "../molecules/Card";
+import ValidationCard from "../molecules/ValidationCard";
+import { API_URL } from "@env";
 
 const imageUri =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuCi1BRrDqNfPWjt1gBro2agzG7k2-5XE4X6lIikweuiChxIgNZSAd_xFZAcU9VYCCfqwAv7qE0LFAyLz4pQxtCl8paK5N2xWB2Aa9hTjVNgC6RkMGxLOJxyZpVF80zQNBnZDcWX-5R37D1F652k9DwIuLFN33Kavrr6A_fvIWVw-8QqJMSz3z8ktxe4eBPUtGNQ5I0Wu65SCbGq3STHyrocHzdTlHfGJfTtTN9OfeIlQsBCmLvpt7quFiJxpadIJqGaxGTN7Ov1zGoE";
@@ -19,27 +23,25 @@ export default function Register({ navigation }) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
-
+  const [focusedField, setFocusedField] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleRegister = () => {
-    // Limpiamos errores previos al presionar
     setErrorMessage("");
 
-    // Validar campos vacíos
     if (!name || !gmail || !password || !confirmPassword) {
       setErrorMessage("Por favor, rellena todos los campos.");
       return;
     }
 
-    // Validar contraseñas
     if (password !== confirmPassword) {
       setErrorMessage("Las contraseñas no coinciden.");
       return;
     }
 
     console.log("Campos validados correctamente. Enviando a la API...");
-    fetch("http://localhost:5000/api/register", {
+    console.log("Datos enviados:", API_URL);
+    fetch(`${API_URL}/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -52,8 +54,11 @@ export default function Register({ navigation }) {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("Respuesta de la API:", data);
-        // Manejar la respuesta de la API aquí
+        if (!data.success) {
+          setErrorMessage(data.message);
+        } else {
+          setErrorMessage("Registro exitoso");
+        }
       })
       .catch((error) => {
         console.error("Error al registrar:", error);
@@ -63,68 +68,105 @@ export default function Register({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ImageBackground source={{ uri: imageUri }} style={styles.image}>
-        <View style={styles.overlay} />
-        <ScrollView
-          contentContainerStyle={styles.content}
-          keyboardShouldPersistTaps="always" // Cambiado a 'always' para evitar problemas de clicks en Web
-        >
-          <View style={styles.hero}>
-            <Text style={styles.kicker}>Comienza aquí</Text>
-            <Text style={styles.title}>Crea tu cuenta</Text>
-            <Text style={styles.subtitle}>
-              Regístrate para guardar y compartir tus recetas favoritas.
-            </Text>
-          </View>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.keyboardAvoidingView}
+      >
+        {/* CORRECCIÓN: El estilo 'styles.image' ahora asegura el flex: 1 aquí dentro */}
+        <ImageBackground source={{ uri: imageUri }} style={styles.image}>
+          <View style={styles.overlay} />
+          <ScrollView
+            contentContainerStyle={styles.content}
+            keyboardShouldPersistTaps="always"
+          >
+            <View style={styles.hero}>
+              <Text style={styles.kicker}>Comienza aquí</Text>
+              <Text style={styles.title}>Crea tu cuenta</Text>
+              <Text style={styles.subtitle}>
+                Regístrate para guardar y compartir tus recetas favoritas.
+              </Text>
+            </View>
 
-          <Card title="Registro">
-            {/* 2. Si hay un error, mostramos este banner rojo tipo Toast */}
-            {errorMessage ? (
-              <View style={styles.errorContainer}>
-                <Text style={styles.errorText}>{errorMessage}</Text>
-              </View>
-            ) : (
-              <View style={styles.successContainer}>
-                <Text style={styles.successText}>Registro exitoso!</Text>
-              </View>
-            )}
-            {/* Si no hay error, dejamos un espacio para que no salte el diseño */}
-            <Input
-              placeholder="Nombre completo"
-              autoCapitalize="words"
-              value={name}
-              onChangeText={setName}
-            />
-            <Input
-              placeholder="Correo electrónico"
-              keyboardType="gmail-address"
-              type="gmail"
-              autoCapitalize="none"
-              value={gmail}
-              onChangeText={setgmail}
-            />
-            <Input
-              placeholder="Contraseña"
-              type="password"
-              value={password}
-              onChangeText={setPassword}
-            />
-            <Input
-              placeholder="Confirmar contraseña"
-              type="password"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-            />
-            <Button title="Registrarse" onPress={handleRegister} />
-            <Text
-              style={styles.footerText}
-              onPress={() => navigation.navigate("Login")}
-            >
-              ¿Ya tienes cuenta? <Text style={styles.link}>Iniciar sesión</Text>
-            </Text>
-          </Card>
-        </ScrollView>
-      </ImageBackground>
+            <Card title="Registro">
+              {errorMessage ? (
+                <View style={styles.errorContainer}>
+                  <Text style={styles.errorText}>{errorMessage}</Text>
+                </View>
+              ) : null}
+
+              <Input
+                placeholder="Nombre completo"
+                autoCapitalize="words"
+                value={name}
+                onChangeText={setName}
+                onFocus={() => setFocusedField("name")}
+                onBlur={() =>
+                  setFocusedField((currentField) =>
+                    currentField === "name" ? null : currentField,
+                  )
+                }
+              />
+
+              <Input
+                placeholder="Correo electrónico"
+                keyboardType="email-address"
+                type="email"
+                autoCapitalize="none"
+                value={gmail}
+                onChangeText={setgmail}
+                onFocus={() => setFocusedField("email")}
+                onBlur={() =>
+                  setFocusedField((currentField) =>
+                    currentField === "email" ? null : currentField,
+                  )
+                }
+              />
+              {focusedField === "email" && (
+                <ValidationCard focusedField={focusedField} value={gmail} />
+              )}
+
+              <Input
+                placeholder="Contraseña"
+                type="password"
+                value={password}
+                onChangeText={setPassword}
+                onFocus={() => setFocusedField("password")}
+                onBlur={() =>
+                  setFocusedField((currentField) =>
+                    currentField === "password" ? null : currentField,
+                  )
+                }
+              />
+              {focusedField === "password" && (
+                <ValidationCard focusedField={focusedField} value={password} />
+              )}
+
+              <Input
+                placeholder="Confirmar contraseña"
+                type="password"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                onFocus={() => setFocusedField("confirmPassword")}
+                onBlur={() =>
+                  setFocusedField((currentField) =>
+                    currentField === "confirmPassword" ? null : currentField,
+                  )
+                }
+              />
+
+              <Button title="Registrarse" onPress={handleRegister} />
+
+              <Text
+                style={styles.footerText}
+                onPress={() => navigation.navigate("Login")}
+              >
+                ¿Ya tienes cuenta?{" "}
+                <Text style={styles.link}>Iniciar sesión</Text>
+              </Text>
+            </Card>
+          </ScrollView>
+        </ImageBackground>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -134,8 +176,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#111111",
   },
-  image: {
+  keyboardAvoidingView: {
     flex: 1,
+  },
+  image: {
+    flex: 1, // Garantiza que la imagen de fondo ocupe todo el espacio recalculado por el teclado
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
@@ -172,7 +217,6 @@ const styles = StyleSheet.create({
     marginTop: 12,
     maxWidth: 340,
   },
-  // Estilos para el nuevo mensaje de error (estilo Toast dentro del Card)
   errorContainer: {
     backgroundColor: "rgba(255, 75, 75, 0.15)",
     borderColor: "rgba(255, 75, 75, 0.3)",
@@ -183,12 +227,6 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: "#FF4B4B",
-    fontSize: 14,
-    textAlign: "center",
-    fontWeight: "500",
-  },
-  successText: {
-    color: "#17f647",
     fontSize: 14,
     textAlign: "center",
     fontWeight: "500",

@@ -59,7 +59,7 @@ export class DB {
       const values = queryConfig.orderArray.map((key) => params[key]);
 
       // DEBUG: Esto es lo que realmente ve la base de datos
-      console.log("Enviando a SQL:", query);
+      // console.log("Enviando a SQL:", query);
 
       const result = await this.pool.query(query, values);
       return result.rows;
