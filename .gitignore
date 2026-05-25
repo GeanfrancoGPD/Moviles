@@ -1,0 +1,20 @@
+# Dependencias
+node_modules/
+.expo/
+web-build/
+
+# Archivos de entorno
+.env
+.env.local
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de editor
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*

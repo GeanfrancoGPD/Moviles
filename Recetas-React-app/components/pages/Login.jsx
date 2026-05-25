@@ -12,21 +12,20 @@ import {
 import Input from "../atom/Inputs";
 import Button from "../atom/Button";
 import Card from "../molecules/Card";
-import ValidationCard from "../molecules/ValidationCard";
-import { API_URL } from "@env";
+import { useAuth } from "../context/AuthContext";
 
 const imageUri =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuCi1BRrDqNfPWjt1gBro2agzG7k2-5XE4X6lIikweuiChxIgNZSAd_xFZAcU9VYCCfqwAv7qE0LFAyLz4pQxtCl8paK5N2xWB2Aa9hTjVNgC6RkMGxLOJxyZpVF80zQNBnZDcWX-5R37D1F652k9DwIuLFN33Kavrr6A_fvIWVw-8QqJMSz3z8ktxe4eBPUtGNQ5I0Wu65SCbGq3STHyrocHzdTlHfGJfTtTN9OfeIlQsBCmLvpt7quFiJxpadIJqGaxGTN7Ov1zGoE";
 
 export default function Login({ navigation }) {
+  const { login } = useAuth();
   const [gmail, setgmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [errorMessage, setErrorMessage] = React.useState("");
   const [focusedField, setFocusedField] = React.useState(null);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setErrorMessage("");
-
     if (!gmail || !password) {
       setErrorMessage("Por favor, ingresa tu correo y contraseña.");
       return;
@@ -63,101 +62,74 @@ export default function Login({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Envolvemos todo el contenido dentro de KeyboardAvoidingView */}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.keyboardAvoidingView}
-      >
-        <ImageBackground source={{ uri: imageUri }} style={styles.image}>
-          <View style={styles.overlay} />
-          <ScrollView
-            contentContainerStyle={styles.content}
-            keyboardShouldPersistTaps="handled"
-          >
-            <View style={styles.hero}>
-              <Text style={styles.kicker}>Bienvenido</Text>
-              <Text style={styles.title}>Recetas que te acompañan</Text>
-              <Text style={styles.subtitle}>
-                Ingresa para guardar tus recetas favoritas y descubrir nuevas
-                ideas.
-              </Text>
-            </View>
+      <ImageBackground source={{ uri: imageUri }} style={styles.image}>
+        <View style={styles.overlay} />
+        <ScrollView
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator
+        >
+          <View style={styles.hero}>
+            <Text style={styles.kicker}>Bienvenido</Text>
+            <Text style={styles.title}>Recetas que te acompañan</Text>
+            <Text style={styles.subtitle}>
+              Ingresa para guardar tus recetas favoritas y descubrir nuevas
+              ideas.
+            </Text>
+          </View>
 
-            <Card title="Iniciar sesión">
-              {errorMessage ? (
-                <View style={styles.errorContainer}>
-                  <Text style={styles.errorText}>{errorMessage}</Text>
-                </View>
-              ) : null}
+          <Card title="Iniciar sesión">
+            {errorMessage ? (
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>{errorMessage}</Text>
+              </View>
+            ) : null}
 
-              {focusedField === "email" ? (
-                <ValidationCard focusedField={focusedField} value={gmail} />
-              ) : null}
-              <Input
-                placeholder="Correo electrónico"
-                keyboardType="email-address"
-                type="email"
-                value={gmail}
-                autoCapitalize="none"
-                onChangeText={setgmail}
-                onFocus={() => setFocusedField("email")}
-                onBlur={() =>
-                  setFocusedField((currentField) =>
-                    currentField === "email" ? null : currentField,
-                  )
-                }
-              />
+            <Input
+              placeholder="Correo electrónico"
+              keyboardType="email-address"
+              type="email"
+              value={gmail}
+              autoCapitalize="none"
+              onChangeText={setgmail}
+            />
 
-              {/* --- CAMPO CONTRASEÑA --- */}
-              {focusedField === "password" ? (
-                <ValidationCard focusedField={focusedField} value={password} />
-              ) : null}
-              <Input
-                placeholder="Contraseña"
-                type="password"
-                value={password}
-                onChangeText={setPassword}
-                onFocus={() => setFocusedField("password")}
-                onBlur={() =>
-                  setFocusedField((currentField) =>
-                    currentField === "password" ? null : currentField,
-                  )
-                }
-              />
+            {focusedField === "email" ? (
+              <ValidationCard focusedField={focusedField} value={gmail} />
+            ) : null}
+            <Input
+              placeholder="Correo electrónico"
+              keyboardType="email-address"
+              type="email"
+              value={gmail}
+              autoCapitalize="none"
+              onChangeText={setgmail}
+              onFocus={() => setFocusedField("email")}
+              onBlur={() =>
+                setFocusedField((currentField) =>
+                  currentField === "email" ? null : currentField,
+                )
+              }
+            />
 
-              <Button
-                title="Entrar"
-                onPress={() => {
-                  handleLogin();
-                }}
-              />
+            <Button title="Entrar" onPress={handleLogin} />
 
-              <Text
-                style={styles.footerText}
-                onPress={() => navigation.navigate("Register")}
-              >
-                ¿No tienes cuenta?
-              </Text>
-              <Text style={styles.footerText}>¿Olvidaste tu contraseña?</Text>
-            </Card>
-          </ScrollView>
-        </ImageBackground>
-      </KeyboardAvoidingView>
+            <Text
+              style={styles.footerText}
+              onPress={() => navigation.navigate("Register")}
+            >
+              ¿No tienes cuenta? <Text style={styles.link}>Regístrate</Text>
+            </Text>
+          </Card>
+        </ScrollView>
+      </ImageBackground>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#111111",
-  },
-  keyboardAvoidingView: {
-    flex: 1, // 3. Esto es crucial para que el KeyboardAvoidingView ocupe toda la pantalla
-  },
-  image: {
-    flex: 1,
-  },
+  container: { flex: 1, backgroundColor: "#111111" },
+  image: { flex: 1 },
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(12, 12, 12, 0.62)",
@@ -168,9 +140,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 40,
   },
-  hero: {
-    marginBottom: 24,
-  },
+  hero: { marginBottom: 24 },
   kicker: {
     color: "#F4C95D",
     fontSize: 14,
@@ -197,8 +167,9 @@ const styles = StyleSheet.create({
     color: "rgba(255, 255, 255, 0.78)",
     textAlign: "center",
     fontSize: 13,
-    marginTop: 12, // Aumenté un poco el margen superior para que no se pegue tanto
+    marginTop: 16,
   },
+  link: { color: "#F4C95D", fontWeight: "600" },
   errorContainer: {
     backgroundColor: "rgba(255, 75, 75, 0.15)",
     borderColor: "rgba(255, 75, 75, 0.3)",

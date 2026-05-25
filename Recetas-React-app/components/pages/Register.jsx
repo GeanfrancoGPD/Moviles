@@ -23,7 +23,10 @@ export default function Register({ navigation }) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
+<<<<<<< HEAD
   const [focusedField, setFocusedField] = useState(null);
+=======
+>>>>>>> origin/Luisbranch
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleRegister = () => {
@@ -46,18 +49,22 @@ export default function Register({ navigation }) {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify({
         nombre: name,
         gmail: gmail,
+        email: gmail,
         password: password,
       }),
     })
       .then((response) => response.json())
       .then((data) => {
-        if (!data.success) {
-          setErrorMessage(data.message);
+        console.log("Respuesta de la API:", data);
+        if (data.success) {
+          // Redirige al login tras registro exitoso
+          navigation.replace("Login");
         } else {
-          setErrorMessage("Registro exitoso");
+          setErrorMessage(data.message || "Error al registrar");
         }
       })
       .catch((error) => {

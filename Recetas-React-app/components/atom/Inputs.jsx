@@ -13,37 +13,30 @@ export default function Input({
   keyboardType,
   value,
   onChangeText,
-  onFocus,
-  onBlur,
-  ...restProps
+  multiline = false,
+  style = {},
 }) {
-  // Estado para controlar si se muestra el texto o se oculta con asteriscos
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, style]}>
       <TextInput
         placeholder={placeholder}
-        placeholderTextColor="rgba(255, 255, 255, 0.65)"
-        style={styles.input}
-        keyboardType={type === "email" ? keyboardType : undefined}
-        // Si es password y "isPasswordVisible" es falso, se oculta el texto
+        placeholderTextColor="#999999"
+        style={[styles.input, multiline && styles.multilineInput]}
+        keyboardType={keyboardType}
         secureTextEntry={type === "password" && !isPasswordVisible}
         value={value}
         maxLength={30}
         onChangeText={onChangeText}
-        onFocus={onFocus}
-        onBlur={onBlur}
-        {...restProps}
+        multiline={multiline}
       />
 
-      {/* Solo mostramos el ojito si el tipo de input es "password" */}
       {type === "password" && (
         <TouchableOpacity
           style={styles.iconContainer}
           onPress={() => setIsPasswordVisible(!isPasswordVisible)}
         >
-          {/* Aquí puedes usar un icono de librerías como lucide-react-native o expo-vector-icons */}
           <Text style={styles.iconText}>{isPasswordVisible ? "👁️" : "🙈"}</Text>
         </TouchableOpacity>
       )}
@@ -53,19 +46,24 @@ export default function Input({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row", // Alinea el input y el ojo horizontalmente
+    flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
-    borderColor: "rgba(255, 255, 255, 0.14)",
+    backgroundColor: "#F5F5F5",
+    borderColor: "#E0E0E0",
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: 12,
     paddingHorizontal: 16,
+    marginBottom: 12,
   },
   input: {
-    flex: 1, // Hace que el input tome todo el espacio disponible dejando el ojo al final
-    color: "#FFFFFF",
-    paddingVertical: 14,
+    flex: 1,
+    color: "#333333",
+    paddingVertical: 12,
     fontSize: 15,
+  },
+  multilineInput: {
+    minHeight: 80,
+    textAlignVertical: "top",
   },
   iconContainer: {
     paddingLeft: 10,
