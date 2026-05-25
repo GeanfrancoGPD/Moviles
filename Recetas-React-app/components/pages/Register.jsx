@@ -23,10 +23,7 @@ export default function Register({ navigation }) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
-<<<<<<< HEAD
   const [focusedField, setFocusedField] = useState(null);
-=======
->>>>>>> origin/Luisbranch
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleRegister = () => {
