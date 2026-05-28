@@ -1,7 +1,6 @@
 import React from "react";
 import {
   ImageBackground,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -9,6 +8,9 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+// Importación corregida de la librería especializada
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import Input from "../atom/Inputs";
 import Button from "../atom/Button";
 import Card from "../molecules/Card";

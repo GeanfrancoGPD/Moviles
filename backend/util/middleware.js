@@ -4,15 +4,20 @@ import cors from "cors";
 
 const app = express();
 
-// Railway usa proxy
-app.set("trust proxy", 1);
-
 // --- CORS global ---
+
 app.use(
   cors({
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: [
+      "http://localhost:8081",
+      "http://localhost:8081",
+      "http://192.168.1.165:8081",
+      "http://192.168.100.5:8081",
+      "exp://192.168.100.5:8081",
+    ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
 

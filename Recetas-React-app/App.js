@@ -16,8 +16,8 @@ const linking = {
     screens: {
       Login: "",
       Home: "home",
-        AddRecipe: "home/add-recipe",
-        RecipeDetail: "home/recipe/:recipeId",
+      AddRecipe: "home/add-recipe",
+      RecipeDetail: "home/recipe/:recipeId",
     },
   },
 };
@@ -26,18 +26,18 @@ export default function App() {
   return (
     <AuthProvider>
       <NavigationContainer linking={linking}>
-      <Stack.Navigator
-        initialRouteName="Home"
-        screenOptions={{
-          headerShown: false,
-        }}
-      >
-        <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="Register" component={Register} />
-        <Stack.Screen name="Home" component={BarraNavegacion} />
-        <Stack.Screen name="AddRecipe" component={AddRecipePage} />
-        <Stack.Screen name="RecipeDetail" component={RecipeDetailPage} />
-      </Stack.Navigator>
+        <Stack.Navigator
+          initialRouteName="Login"
+          screenOptions={{
+            headerShown: false,
+          }}
+        >
+          <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="Register" component={Register} />
+          <Stack.Screen name="Home" component={BarraNavegacion} />
+          <Stack.Screen name="AddRecipe" component={AddRecipePage} />
+          <Stack.Screen name="RecipeDetail" component={RecipeDetailPage} />
+        </Stack.Navigator>
       </NavigationContainer>
     </AuthProvider>
   );

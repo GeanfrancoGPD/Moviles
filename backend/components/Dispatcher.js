@@ -40,8 +40,8 @@ export class Dispatcher {
   }
 
   async login(sessionObject) {
-    const { gmail, email, password } = sessionObject.request.body;
-    const userEmail = gmail ?? email;
+    const { gmail, password } = sessionObject.request.body;
+    const userEmail = gmail;
 
     if (!userEmail || !password) {
       return sessionObject.response.status(400).json({
@@ -91,8 +91,8 @@ export class Dispatcher {
   }
 
   async registerUser(sessionObject) {
-    const { nombre, gmail, email, password } = sessionObject.request.body;
-    const userEmail = gmail ?? email;
+    const { nombre, gmail, password } = sessionObject.request.body;
+    const userEmail = gmail;
     console.log("datos:", nombre, userEmail, password);
 
     if (!userEmail || !password || !nombre) {
