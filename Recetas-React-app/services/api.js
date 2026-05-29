@@ -35,6 +35,21 @@ export async function logout() {
   await fetch(`${API_URL}/logout`, { method: 'POST', credentials: 'include' });
 }
 
+export async function updateUserProfile({ id, nombre, gmail }) {
+  return callToProcess('updateUserProfile', {
+    id,
+    nombre,
+    gmail,
+  });
+}
+
+export async function updatePassword({ id, password }) {
+  return callToProcess('updatePassword', {
+    id,
+    password,
+  });
+}
+
 // ========== RECETAS ==========
 export async function getUserRecipes(usuarioId) {
   console.log('Obteniendo recetas del usuario:', usuarioId);

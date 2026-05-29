@@ -6,6 +6,7 @@ import Login from "./components/pages/Login";
 import Register from "./components/pages/Register";
 import AddRecipePage from "./components/pages/AddRecipePage";
 import RecipeDetailPage from "./components/pages/RecipeDetailPage";
+import AccountSecurityPage from "./components/pages/AccountSecurityPage";
 import { AuthProvider } from "./components/context/AuthContext";
 
 const Stack = createStackNavigator();
@@ -18,6 +19,7 @@ const linking = {
       Home: "home",
         AddRecipe: "home/add-recipe",
         RecipeDetail: "home/recipe/:recipeId",
+        AccountSecurity: "home/account-security",
     },
   },
 };
@@ -37,6 +39,7 @@ export default function App() {
         <Stack.Screen name="Home" component={BarraNavegacion} />
         <Stack.Screen name="AddRecipe" component={AddRecipePage} />
         <Stack.Screen name="RecipeDetail" component={RecipeDetailPage} />
+        <Stack.Screen name="AccountSecurity" component={AccountSecurityPage} />
       </Stack.Navigator>
       </NavigationContainer>
     </AuthProvider>
