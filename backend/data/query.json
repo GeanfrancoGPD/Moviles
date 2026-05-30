@@ -37,6 +37,23 @@
     },
     "orderArray": ["nombre", "gmail", "password", "id"]
   },
+  "updateUserProfile": {
+    "query": "UPDATE usuarios SET nombre = $1, gmail = $2 WHERE id = $3 RETURNING id, nombre, gmail AS email, avatar",
+    "structure_params": {
+      "nombre": "string",
+      "gmail": "string",
+      "id": "number"
+    },
+    "orderArray": ["nombre", "gmail", "id"]
+  },
+  "updatePassword": {
+    "query": "UPDATE usuarios SET password = $1 WHERE id = $2 RETURNING id",
+    "structure_params": {
+      "password": "string",
+      "id": "number"
+    },
+    "orderArray": ["password", "id"]
+  },
   "deleteUser": {
     "query": "DELETE FROM usuarios WHERE id = $1 RETURNING id, nombre, gmail AS email",
     "structure_params": {

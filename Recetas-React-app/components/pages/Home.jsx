@@ -44,9 +44,7 @@ export default function Home({ navigation }) {
           style={styles.heroImage} 
         />
         <View style={styles.heroOverlay}>
-          <Text style={styles.heroKicker}>RECETA DEL DÍA</Text>
-          <Text style={styles.heroTitle}>Risotto de Setas Silvestres con Aceite de Trufa</Text>
-          <Text style={styles.heroMeta}>45 mins • Intermedio</Text>
+          <Text style={styles.heroTitle}>Cocinar es convertir ingredientes en momentos inolvidables</Text>
         </View>
       </View>
 
@@ -94,23 +92,34 @@ const styles = StyleSheet.create({
   heroOverlay: { 
     position: 'absolute', 
     left: 16, 
-    bottom: 16 
+    bottom: 16,
+    right: 16,
+    backgroundColor: 'rgba(11, 47, 26, 0.42)',
+    borderRadius: 18,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
   },
   heroKicker: { 
-    color: '#2D6A4F', 
-    opacity: 0.9, 
+    color: '#F4C95D', 
     fontSize: 12, 
     marginBottom: 6, 
     fontWeight: '700' 
   },
   heroTitle: { 
-    color: '#0B2F1A', 
+    color: '#FFFFFF', 
     fontSize: 20, 
-    fontWeight: '700' 
+    fontWeight: '800',
+    textShadowColor: 'rgba(0,0,0,0.45)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   heroMeta: { 
-    color: '#2D6A4F', 
-    marginTop: 6 
+    color: '#F2F4F1', 
+    marginTop: 6,
+    fontWeight: '600',
+    textShadowColor: 'rgba(0,0,0,0.35)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   sectionHeader: { 
     paddingHorizontal: 16, 

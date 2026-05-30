@@ -38,6 +38,10 @@ export default function ProfilePage({ navigation }) {
             <Text style={styles.metaValue}>Sesión activa</Text>
           </View>
 
+          <Button
+            title="Contraseña y seguridad"
+            onPress={() => navigation.navigate('AccountSecurity')}
+          />
           <Button title="Cerrar Sesión" onPress={handleLogout} />
         </View>
       </View>

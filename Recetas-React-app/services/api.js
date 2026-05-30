@@ -43,6 +43,21 @@ export async function logout() {
   await fetch(`${API_URL}/logout`, { method: "POST", credentials: "include" });
 }
 
+export async function updateUserProfile({ id, nombre, gmail }) {
+  return callToProcess("updateUserProfile", {
+    id,
+    nombre,
+    gmail,
+  });
+}
+
+export async function updatePassword({ id, password }) {
+  return callToProcess("updatePassword", {
+    id,
+    password,
+  });
+}
+
 // ========== RECETAS ==========
 export async function getUserRecipes(usuarioId) {
   console.log("Obteniendo recetas del usuario:", usuarioId);
@@ -64,12 +79,32 @@ export async function getRecipeById(recipeId) {
   const recetas = await callToProcess("getRecipeById", { id: recipeId });
   if (!recetas.length) throw new Error("Receta no encontrada");
   const recipe = recetas[0];
-  const ingredientes = await callToProcess("getIngredientsByRecipe", {
+  const rawIngredientes = await callToProcess("getIngredientsByRecipe", {
     receta_id: recipeId,
   });
-  const pasos = await callToProcess("getStepsByRecipe", {
+  const rawPasos = await callToProcess("getStepsByRecipe", {
     receta_id: recipeId,
   });
+
+  const ingredientesList = Array.isArray(rawIngredientes)
+    ? rawIngredientes
+    : rawIngredientes?.ingredientes || rawIngredientes?.ingredients || [];
+
+  const pasosList = Array.isArray(rawPasos)
+    ? rawPasos
+    : rawPasos?.pasos || rawPasos?.steps || [];
+
+  const ingredientes = ingredientesList.map((item) => ({
+    ...item,
+    nombre: item?.nombre || item?.name || item?.ingrediente || "",
+    cantidad: item?.cantidad || item?.quantity || item?.amount || "",
+  }));
+
+  const pasos = pasosList.map((item) => ({
+    ...item,
+    descripcion: item?.descripcion || item?.description || "",
+  }));
+
   return { ...recipe, ingredientes, pasos };
 }
 
