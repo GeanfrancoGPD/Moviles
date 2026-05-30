@@ -1,12 +1,13 @@
-import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Text, StyleSheet } from 'react-native';
+import React from "react";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { Text, StyleSheet } from "react-native";
 
-import MyRecipesPage from '../pages/MyRecipesPage';
-import ExplorePage from '../pages/ExplorePage';
-import GroupsPage from '../pages/GroupsPage';
-import Home from '../pages/Home';
-import ProfilePage from '../pages/ProfilePage';
+import MyRecipesPage from "../pages/MyRecipesPage";
+import ExplorePage from "../pages/ExplorePage";
+import GroupsPage from "../pages/GroupsPage";
+import Home from "../pages/Home";
+import ProfilePage from "../pages/ProfilePage";
+import SvgIcon from "../atom/SvgIcon";
 
 const Tab = createBottomTabNavigator();
 
@@ -14,49 +15,70 @@ export default function BarraNavegacion() {
   return (
     <Tab.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: '#FFFFFF' },
-        headerTintColor: '#0B2F1A',
-        tabBarStyle: { backgroundColor: '#FFFFFF', borderTopColor: '#E6E6E6' },
-        tabBarActiveTintColor: '#2D6A4F',
-        tabBarInactiveTintColor: '#7A8A86',
+        headerStyle: { backgroundColor: "#FFFFFF" },
+        headerTintColor: "#0B2F1A",
+        tabBarStyle: { backgroundColor: "#FFFFFF", borderTopColor: "#E6E6E6" },
+        tabBarActiveTintColor: "#2D6A4F",
+        tabBarInactiveTintColor: "#7A8A86",
       }}
     >
-      <Tab.Screen 
-        name="Inicio" 
+      <Tab.Screen
+        name="Inicio"
         component={Home}
         options={{
           tabBarIcon: ({ color, size }) => (
-              <Text style={{ fontSize: size - 2, color, fontWeight: '700' }}>H</Text>
-            ),
+            <SvgIcon nombre="home" width={size} height={size} color={color} />
+          ),
         }}
       />
-      
-      <Tab.Screen 
-        name="Mis Recetas" 
+
+      <Tab.Screen
+        name="Mis Recetas"
         component={MyRecipesPage}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Text style={{ fontSize: size - 2, color, fontWeight: '700' }}>R</Text>
+            <Text style={{ fontSize: size - 2, color, fontWeight: "700" }}>
+              <SvgIcon
+                nombre="recipe"
+                width={size}
+                height={size}
+                color={color}
+              />
+            </Text>
           ),
         }}
       />
-      
-      <Tab.Screen 
-        name="Explorar" 
+
+      <Tab.Screen
+        name="Explorar"
         component={ExplorePage}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Text style={{ fontSize: size - 2, color, fontWeight: '700' }}>E</Text>
+            <Text style={{ fontSize: size - 2, color, fontWeight: "700" }}>
+              <SvgIcon
+                nombre="explore"
+                width={size}
+                height={size}
+                color={color}
+              />
+            </Text>
           ),
         }}
       />
-      
-      <Tab.Screen 
-        name="Grupos" 
+
+      <Tab.Screen
+        name="Grupos"
         component={GroupsPage}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Text style={{ fontSize: size - 2, color, fontWeight: '700' }}>G</Text>
+            <Text style={{ fontSize: size - 2, color, fontWeight: "700" }}>
+              <SvgIcon
+                nombre="groups"
+                width={size}
+                height={size}
+                color={color}
+              />
+            </Text>
           ),
         }}
       />
@@ -66,7 +88,14 @@ export default function BarraNavegacion() {
         component={ProfilePage}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Text style={{ fontSize: size - 2, color, fontWeight: '700' }}>P</Text>
+            <Text style={{ fontSize: size - 2, color, fontWeight: "700" }}>
+              <SvgIcon
+                nombre="profile"
+                width={size}
+                height={size}
+                color={color}
+              />
+            </Text>
           ),
         }}
       />
