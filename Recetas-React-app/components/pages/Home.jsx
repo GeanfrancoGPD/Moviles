@@ -1,6 +1,7 @@
 // pages/Home.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
 import { getPublicRecipes } from "../../services/api";
 import RecipeCard from "../molecules/RecipeCard";
@@ -15,20 +16,28 @@ export default function Home({ navigation }) {
     { id: 3, titulo: 'Honey Glazed Salmon', tiempo_coccion: 25, dificultad: 'Easy', is_public: true },
   ];
 
-  useEffect(() => {
-    loadRecipes();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      let active = true;
 
-  const loadRecipes = async () => {
-    try {
-      const data = await getPublicRecipes(user?.id);
-      if (data && data.length > 0) {
-        setRecipes(data);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+      const run = async () => {
+        try {
+          const data = await getPublicRecipes(user?.id);
+          if (active) {
+            setRecipes(Array.isArray(data) ? data : []);
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      };
+
+      run();
+
+      return () => {
+        active = false;
+      };
+    }, [user?.id])
+  );
 
   const displayRecipes = recipes.length > 0 ? recipes : sampleRecipes;
 

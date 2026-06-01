@@ -29,7 +29,7 @@ export default function App() {
     <AuthProvider>
       <NavigationContainer linking={linking}>
         <Stack.Navigator
-          initialRouteName="Home"
+          initialRouteName="Login"
           screenOptions={{
             headerShown: false,
           }}
