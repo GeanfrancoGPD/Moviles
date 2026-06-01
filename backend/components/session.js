@@ -1,4 +1,4 @@
-export class Session {
+class Session {
   constructor(DBComponent) {
     this.DBComponent = DBComponent;
   }
@@ -50,3 +50,5 @@ export class Session {
     });
   }
 }
+
+export default new Session();

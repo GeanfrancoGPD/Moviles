@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-export class DB {
+class DB {
   constructor() {}
 
   async init() {
@@ -36,7 +36,11 @@ export class DB {
 
   async loadQueries() {
     try {
-      const data = fs.readFileSync("./data/query.json", "utf8");
+      const queryFile = new URL(
+        "../module/recipes/data/query.json",
+        import.meta.url,
+      );
+      const data = fs.readFileSync(queryFile, "utf8");
       this.queries = JSON.parse(data);
     } catch (error) {
       console.error("Error al cargar query.json:", error);
@@ -59,6 +63,8 @@ export class DB {
       const query = queryConfig.query;
       const values = queryConfig.orderArray.map((key) => params[key]);
 
+      console.log("QUERY:", query);
+      console.log("VALUES:", values);
       // DEBUG: Esto es lo que realmente ve la base de datos
       // console.log("Enviando a SQL:", query);
 
@@ -75,5 +81,6 @@ export class DB {
       console.log("Conexión a BD cerrada");
     }
   }
-  
 }
+
+export default new DB();

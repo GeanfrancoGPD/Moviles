@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 
-export default class UtilBycript {
+class UtilBycript {
   constructor() {}
 
   async hash(passwordPlano) {
@@ -18,3 +18,5 @@ export default class UtilBycript {
     return match; // true si coinciden, false si no
   }
 }
+
+export default new UtilBycript();
