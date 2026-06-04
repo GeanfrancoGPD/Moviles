@@ -32,7 +32,1812 @@ Variables esperadas en entorno (`.env`):
 - `PORT` (opcional, por defecto `5000`)
 - `DB_USER`
 - `DB_HOST`
-- `DB_DATABASE`
+- `DB_DATABASE`# API de Recetas
+
+## Base URL
+
+```http
+/api
+```
+
+## Autenticación
+
+Las rutas protegidas requieren una sesión válida generada mediante `login`.
+
+---
+
+# Autenticación
+
+## Login
+
+Inicia sesión y crea una sesión para el usuario.
+
+### Endpoint
+
+```http
+POST /login
+```
+
+### Request
+
+```json
+{
+  "gmail": "usuario@gmail.com",
+  "password": "123456"
+}
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "nombre": "Juan Perez",
+    "gmail": "usuario@gmail.com",
+    "avatar": null
+  }
+}
+```
+
+### Error
+
+```json
+{
+  "success": false,
+  "message": "Credenciales inválidas"
+}
+```
+
+---
+
+## Register
+
+Registra un nuevo usuario.
+
+### Endpoint
+
+```http
+POST /register
+```
+
+### Request
+
+```json
+{
+  "nombre": "Juan Perez",
+  "gmail": "usuario@gmail.com",
+  "password": "123456"
+}
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "nombre": "Juan Perez",
+    "email": "usuario@gmail.com",
+    "avatar": null
+  }
+}
+```
+
+---
+
+## Logout
+
+Finaliza la sesión actual.
+
+### Endpoint
+
+```http
+POST /logout
+```
+
+### Response
+
+```json
+{
+  "success": true
+}
+```
+
+---
+
+# Recetas Públicas
+
+## Obtener recetas públicas
+
+Devuelve todas las recetas marcadas como públicas.
+
+### Endpoint
+
+```http
+GET /public-recipes
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "titulo": "Pizza Casera",
+      "descripcion": "Pizza italiana",
+      "imagen_key": "pizza.jpg",
+      "tiempo_coccion": 30,
+      "dificultad": "Media",
+      "calorias": 600,
+      "porciones": 4,
+      "is_public": true,
+      "usuario_id": 1,
+      "created_at": "2025-01-01T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+# Recetas del Usuario
+
+🔒 Requiere autenticación.
+
+## Obtener recetas de un usuario
+
+### Endpoint
+
+```http
+GET /users/:usuarioId/recipes
+```
+
+### Parámetros
+
+| Nombre    | Tipo   | Descripción    |
+| --------- | ------ | -------------- |
+| usuarioId | number | ID del usuario |
+
+### Ejemplo
+
+```http
+GET /users/1/recipes
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "titulo": "Pizza Casera",
+      "descripcion": "Pizza italiana",
+      "imagen_key": "pizza.jpg",
+      "tiempo_coccion": 30,
+      "dificultad": "Media",
+      "calorias": 600,
+      "porciones": 4,
+      "is_public": true,
+      "usuario_id": 1,
+      "created_at": "2025-01-01T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+### Error
+
+```json
+{
+  "success": false,
+  "message": "Usuario inválido"
+}
+```
+
+---
+
+# Grupos
+
+🔒 Requiere autenticación.
+
+## Obtener grupos del usuario
+
+### Endpoint
+
+```http
+GET /users/:usuarioId/groups
+```
+
+### Parámetros
+
+| Nombre    | Tipo   |
+| --------- | ------ |
+| usuarioId | number |
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "nombre": "Comidas Italianas",
+      "descripcion": "Recetas de Italia",
+      "receta_count": 12
+    }
+  ]
+}
+```
+
+---
+
+# Recetas
+
+## Obtener detalle de una receta
+
+### Endpoint
+
+```http
+GET /recipes/:recipeId
+```
+
+### Parámetros
+
+| Nombre   | Tipo   |
+| -------- | ------ |
+| recipeId | number |
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 5,
+    "titulo": "Pizza Casera",
+    "descripcion": "Pizza tradicional italiana",
+    "imagen_key": "pizza.jpg",
+    "tiempo_coccion": 30,
+    "dificultad": "Media",
+    "calorias": 600,
+    "porciones": 4,
+    "is_public": true,
+    "usuario_id": 1,
+    "ingredientes": [
+      {
+        "id": 1,
+        "nombre": "Harina",
+        "cantidad": "500g",
+        "orden": 1
+      }
+    ],
+    "pasos": [
+      {
+        "id": 1,
+        "descripcion": "Mezclar ingredientes",
+        "orden": 1
+      }
+    ]
+  }
+}
+```
+
+### Error
+
+```json
+{
+  "success": false,
+  "message": "Receta no encontrada"
+}
+```
+
+---
+
+## Crear receta
+
+🔒 Requiere autenticación.
+
+### Endpoint
+
+```http
+POST /recipes
+```
+
+### Request
+
+```json
+{
+  "titulo": "Pizza Casera",
+  "descripcion": "Pizza italiana",
+  "imagen_key": "pizza.jpg",
+  "tiempo_coccion": 30,
+  "dificultad": "Media",
+  "calorias": 600,
+  "porciones": 4,
+  "is_public": true,
+  "ingredients": [
+    {
+      "nombre": "Harina",
+      "cantidad": "500g"
+    },
+    {
+      "nombre": "Queso",
+      "cantidad": "250g"
+    }
+  ],
+  "steps": [
+    {
+      "descripcion": "Preparar masa"
+    },
+    {
+      "descripcion": "Hornear"
+    }
+  ],
+  "wantsGroup": true,
+  "groupId": 1
+}
+```
+
+### Campos
+
+| Campo          | Tipo    | Requerido |
+| -------------- | ------- | --------- |
+| titulo         | string  | Sí        |
+| descripcion    | string  | Sí        |
+| imagen_key     | string  | Sí        |
+| tiempo_coccion | number  | Sí        |
+| dificultad     | string  | Sí        |
+| calorias       | number  | Sí        |
+| porciones      | number  | Sí        |
+| is_public      | boolean | Sí        |
+| ingredients    | array   | Sí        |
+| steps          | array   | Sí        |
+| wantsGroup     | boolean | No        |
+| groupId        | number  | No        |
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 15,
+    "titulo": "Pizza Casera",
+    "descripcion": "Pizza italiana",
+    "imagen_key": "pizza.jpg",
+    "tiempo_coccion": 30,
+    "dificultad": "Media",
+    "calorias": 600,
+    "porciones": 4,
+    "is_public": true,
+    "usuario_id": 1
+  }
+}
+```
+
+### Error
+
+```json
+{
+  "success": false,
+  "message": "No se pudo crear la receta"
+}
+```
+
+---
+
+## Eliminar receta
+
+🔒 Requiere autenticación.
+
+### Endpoint
+
+```http
+DELETE /recipes/:recipeId
+```
+
+### Parámetros
+
+| Nombre   | Tipo   |
+| -------- | ------ |
+| recipeId | number |
+
+### Ejemplo
+
+```http
+DELETE /recipes/15
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 15
+  }
+}
+```
+
+### Error
+
+```json
+{
+  "success": false,
+  "message": "No se encontró la receta o no pertenece al usuario"
+}
+```
+
+---
+
+# Perfil de Usuario
+
+🔒 Requiere autenticación.
+
+## Actualizar perfil
+
+### Endpoint
+
+```http
+PUT /profile
+```
+
+### Request
+
+```json
+{
+  "nombre": "Juan Perez",
+  "gmail": "juan@gmail.com"
+}
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "nombre": "Juan Perez",
+      "email": "juan@gmail.com",
+      "avatar": null
+    }
+  ]
+}
+```
+
+---
+
+## Actualizar contraseña
+
+🔒 Requiere autenticación.
+
+### Endpoint
+
+```http
+PUT /password
+```
+
+### Request
+
+```json
+{
+  "password": "NuevaPassword123"
+}
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1
+    }
+  ]
+}
+```
+
+### Error
+
+```json
+{
+  "success": false,
+  "message": "No se pudo actualizar la contraseña"
+}
+```
+
+---
+
+# Códigos HTTP utilizados
+
+| Código | Descripción                |
+| ------ | -------------------------- |
+| 200    | Operación exitosa          |
+| 201    | Recurso creado             |
+| 400    | Datos inválidos            |
+| 401    | No autenticado             |
+| 404    | Recurso no encontrado      |
+| 500    | Error interno del servidor |
+
+---
+
+# Modelo de Datos
+
+## Usuario
+
+```json
+{
+  "id": 1,
+  "nombre": "Juan Perez",
+  "gmail": "usuario@gmail.com",
+  "avatar": null
+}
+```
+
+## Receta
+
+```json
+{
+  "id": 1,
+  "titulo": "Pizza Casera",
+  "descripcion": "Pizza italiana",
+  "imagen_key": "pizza.jpg",
+  "tiempo_coccion": 30,
+  "dificultad": "Media",
+  "calorias": 600,
+  "porciones": 4,
+  "is_public": true,
+  "usuario_id": 1
+}
+```
+
+## Ingrediente
+
+```json
+{
+  "id": 1,
+  "nombre": "Harina",
+  "cantidad": "500g",
+  "orden": 1
+}
+```
+
+## Paso
+
+```json
+{
+  "id": 1,
+  "descripcion": "Preparar masa",
+  "orden": 1
+}
+```
+
+## Grupo
+
+```json
+{
+  "id": 1,
+  "nombre": "Comidas Italianas",
+  "descripcion": "Recetas italianas",
+  "receta_count": 12
+}
+```
+
+# API de Recetas
+
+## Base URL
+
+```http
+/api
+```
+
+## Autenticación
+
+Las rutas protegidas requieren una sesión válida generada mediante `login`.
+
+---
+
+# Autenticación
+
+## Login
+
+Inicia sesión y crea una sesión para el usuario.
+
+### Endpoint
+
+```http
+POST /login
+```
+
+### Request
+
+```json
+{
+  "gmail": "usuario@gmail.com",
+  "password": "123456"
+}
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "nombre": "Juan Perez",
+    "gmail": "usuario@gmail.com",
+    "avatar": null
+  }
+}
+```
+
+### Error
+
+```json
+{
+  "success": false,
+  "message": "Credenciales inválidas"
+}
+```
+
+---
+
+## Register
+
+Registra un nuevo usuario.
+
+### Endpoint
+
+```http
+POST /register
+```
+
+### Request
+
+```json
+{
+  "nombre": "Juan Perez",
+  "gmail": "usuario@gmail.com",
+  "password": "123456"
+}
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "nombre": "Juan Perez",
+    "email": "usuario@gmail.com",
+    "avatar": null
+  }
+}
+```
+
+---
+
+## Logout
+
+Finaliza la sesión actual.
+
+### Endpoint
+
+```http
+POST /logout
+```
+
+### Response
+
+```json
+{
+  "success": true
+}
+```
+
+---
+
+# Recetas Públicas
+
+## Obtener recetas públicas
+
+Devuelve todas las recetas marcadas como públicas.
+
+### Endpoint
+
+```http
+GET /public-recipes
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "titulo": "Pizza Casera",
+      "descripcion": "Pizza italiana",
+      "imagen_key": "pizza.jpg",
+      "tiempo_coccion": 30,
+      "dificultad": "Media",
+      "calorias": 600,
+      "porciones": 4,
+      "is_public": true,
+      "usuario_id": 1,
+      "created_at": "2025-01-01T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+# Recetas del Usuario
+
+🔒 Requiere autenticación.
+
+## Obtener recetas de un usuario
+
+### Endpoint
+
+```http
+GET /users/:usuarioId/recipes
+```
+
+### Parámetros
+
+| Nombre    | Tipo   | Descripción    |
+| --------- | ------ | -------------- |
+| usuarioId | number | ID del usuario |
+
+### Ejemplo
+
+```http
+GET /users/1/recipes
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "titulo": "Pizza Casera",
+      "descripcion": "Pizza italiana",
+      "imagen_key": "pizza.jpg",
+      "tiempo_coccion": 30,
+      "dificultad": "Media",
+      "calorias": 600,
+      "porciones": 4,
+      "is_public": true,
+      "usuario_id": 1,
+      "created_at": "2025-01-01T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+### Error
+
+```json
+{
+  "success": false,
+  "message": "Usuario inválido"
+}
+```
+
+---
+
+# Grupos
+
+🔒 Requiere autenticación.
+
+## Obtener grupos del usuario
+
+### Endpoint
+
+```http
+GET /users/:usuarioId/groups
+```
+
+### Parámetros
+
+| Nombre    | Tipo   |
+| --------- | ------ |
+| usuarioId | number |
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "nombre": "Comidas Italianas",
+      "descripcion": "Recetas de Italia",
+      "receta_count": 12
+    }
+  ]
+}
+```
+
+---
+
+# Recetas
+
+## Obtener detalle de una receta
+
+### Endpoint
+
+```http
+GET /recipes/:recipeId
+```
+
+### Parámetros
+
+| Nombre   | Tipo   |
+| -------- | ------ |
+| recipeId | number |
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 5,
+    "titulo": "Pizza Casera",
+    "descripcion": "Pizza tradicional italiana",
+    "imagen_key": "pizza.jpg",
+    "tiempo_coccion": 30,
+    "dificultad": "Media",
+    "calorias": 600,
+    "porciones": 4,
+    "is_public": true,
+    "usuario_id": 1,
+    "ingredientes": [
+      {
+        "id": 1,
+        "nombre": "Harina",
+        "cantidad": "500g",
+        "orden": 1
+      }
+    ],
+    "pasos": [
+      {
+        "id": 1,
+        "descripcion": "Mezclar ingredientes",
+        "orden": 1
+      }
+    ]
+  }
+}
+```
+
+### Error
+
+```json
+{
+  "success": false,
+  "message": "Receta no encontrada"
+}
+```
+
+---
+
+## Crear receta
+
+🔒 Requiere autenticación.
+
+### Endpoint
+
+```http
+POST /recipes
+```
+
+### Request
+
+```json
+{
+  "titulo": "Pizza Casera",
+  "descripcion": "Pizza italiana",
+  "imagen_key": "pizza.jpg",
+  "tiempo_coccion": 30,
+  "dificultad": "Media",
+  "calorias": 600,
+  "porciones": 4,
+  "is_public": true,
+  "ingredients": [
+    {
+      "nombre": "Harina",
+      "cantidad": "500g"
+    },
+    {
+      "nombre": "Queso",
+      "cantidad": "250g"
+    }
+  ],
+  "steps": [
+    {
+      "descripcion": "Preparar masa"
+    },
+    {
+      "descripcion": "Hornear"
+    }
+  ],
+  "wantsGroup": true,
+  "groupId": 1
+}
+```
+
+### Campos
+
+| Campo          | Tipo    | Requerido |
+| -------------- | ------- | --------- |
+| titulo         | string  | Sí        |
+| descripcion    | string  | Sí        |
+| imagen_key     | string  | Sí        |
+| tiempo_coccion | number  | Sí        |
+| dificultad     | string  | Sí        |
+| calorias       | number  | Sí        |
+| porciones      | number  | Sí        |
+| is_public      | boolean | Sí        |
+| ingredients    | array   | Sí        |
+| steps          | array   | Sí        |
+| wantsGroup     | boolean | No        |
+| groupId        | number  | No        |
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 15,
+    "titulo": "Pizza Casera",
+    "descripcion": "Pizza italiana",
+    "imagen_key": "pizza.jpg",
+    "tiempo_coccion": 30,
+    "dificultad": "Media",
+    "calorias": 600,
+    "porciones": 4,
+    "is_public": true,
+    "usuario_id": 1
+  }
+}
+```
+
+### Error
+
+```json
+{
+  "success": false,
+  "message": "No se pudo crear la receta"
+}
+```
+
+---
+
+## Eliminar receta
+
+🔒 Requiere autenticación.
+
+### Endpoint
+
+```http
+DELETE /recipes/:recipeId
+```
+
+### Parámetros
+
+| Nombre   | Tipo   |
+| -------- | ------ |
+| recipeId | number |
+
+### Ejemplo
+
+```http
+DELETE /recipes/15
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 15
+  }
+}
+```
+
+### Error
+
+```json
+{
+  "success": false,
+  "message": "No se encontró la receta o no pertenece al usuario"
+}
+```
+
+---
+
+# Perfil de Usuario
+
+🔒 Requiere autenticación.
+
+## Actualizar perfil
+
+### Endpoint
+
+```http
+PUT /profile
+```
+
+### Request
+
+```json
+{
+  "nombre": "Juan Perez",
+  "gmail": "juan@gmail.com"
+}
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "nombre": "Juan Perez",
+      "email": "juan@gmail.com",
+      "avatar": null
+    }
+  ]
+}
+```
+
+---
+
+## Actualizar contraseña
+
+🔒 Requiere autenticación.
+
+### Endpoint
+
+```http
+PUT /password
+```
+
+### Request
+
+```json
+{
+  "password": "NuevaPassword123"
+}
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1
+    }
+  ]
+}
+```
+
+### Error
+
+```json
+{
+  "success": false,
+  "message": "No se pudo actualizar la contraseña"
+}
+```
+
+---
+
+# Códigos HTTP utilizados
+
+| Código | Descripción                |
+| ------ | -------------------------- |
+| 200    | Operación exitosa          |
+| 201    | Recurso creado             |
+| 400    | Datos inválidos            |
+| 401    | No autenticado             |
+| 404    | Recurso no encontrado      |
+| 500    | Error interno del servidor |
+
+---
+
+# Modelo de Datos
+
+## Usuario
+
+```json
+{
+  "id": 1,
+  "nombre": "Juan Perez",
+  "gmail": "usuario@gmail.com",
+  "avatar": null
+}
+```
+
+## Receta
+
+```json
+{
+  "id": 1,
+  "titulo": "Pizza Casera",
+  "descripcion": "Pizza italiana",
+  "imagen_key": "pizza.jpg",
+  "tiempo_coccion": 30,
+  "dificultad": "Media",
+  "calorias": 600,
+  "porciones": 4,
+  "is_public": true,
+  "usuario_id": 1
+}
+```
+
+## Ingrediente
+
+```json
+{
+  "id": 1,
+  "nombre": "Harina",
+  "cantidad": "500g",
+  "orden": 1
+}
+```
+
+## Paso
+
+```json
+{
+  "id": 1,
+  "descripcion": "Preparar masa",
+  "orden": 1
+}
+```
+
+## Grupo
+
+```json
+{
+  "id": 1,
+  "nombre": "Comidas Italianas",
+  "descripcion": "Recetas italianas",
+  "receta_count": 12
+}
+```
+
+# API de Recetas
+
+## Base URL
+
+```http
+/api
+```
+
+## Autenticación
+
+Las rutas protegidas requieren una sesión válida generada mediante `login`.
+
+---
+
+# Autenticación
+
+## Login
+
+Inicia sesión y crea una sesión para el usuario.
+
+### Endpoint
+
+```http
+POST /login
+```
+
+### Request
+
+```json
+{
+  "gmail": "usuario@gmail.com",
+  "password": "123456"
+}
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "nombre": "Juan Perez",
+    "gmail": "usuario@gmail.com",
+    "avatar": null
+  }
+}
+```
+
+### Error
+
+```json
+{
+  "success": false,
+  "message": "Credenciales inválidas"
+}
+```
+
+---
+
+## Register
+
+Registra un nuevo usuario.
+
+### Endpoint
+
+```http
+POST /register
+```
+
+### Request
+
+```json
+{
+  "nombre": "Juan Perez",
+  "gmail": "usuario@gmail.com",
+  "password": "123456"
+}
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "nombre": "Juan Perez",
+    "email": "usuario@gmail.com",
+    "avatar": null
+  }
+}
+```
+
+---
+
+## Logout
+
+Finaliza la sesión actual.
+
+### Endpoint
+
+```http
+POST /logout
+```
+
+### Response
+
+```json
+{
+  "success": true
+}
+```
+
+---
+
+# Recetas Públicas
+
+## Obtener recetas públicas
+
+Devuelve todas las recetas marcadas como públicas.
+
+### Endpoint
+
+```http
+GET /public-recipes
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "titulo": "Pizza Casera",
+      "descripcion": "Pizza italiana",
+      "imagen_key": "pizza.jpg",
+      "tiempo_coccion": 30,
+      "dificultad": "Media",
+      "calorias": 600,
+      "porciones": 4,
+      "is_public": true,
+      "usuario_id": 1,
+      "created_at": "2025-01-01T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+# Recetas del Usuario
+
+🔒 Requiere autenticación.
+
+## Obtener recetas de un usuario
+
+### Endpoint
+
+```http
+GET /users/:usuarioId/recipes
+```
+
+### Parámetros
+
+| Nombre    | Tipo   | Descripción    |
+| --------- | ------ | -------------- |
+| usuarioId | number | ID del usuario |
+
+### Ejemplo
+
+```http
+GET /users/1/recipes
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "titulo": "Pizza Casera",
+      "descripcion": "Pizza italiana",
+      "imagen_key": "pizza.jpg",
+      "tiempo_coccion": 30,
+      "dificultad": "Media",
+      "calorias": 600,
+      "porciones": 4,
+      "is_public": true,
+      "usuario_id": 1,
+      "created_at": "2025-01-01T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+### Error
+
+```json
+{
+  "success": false,
+  "message": "Usuario inválido"
+}
+```
+
+---
+
+# Grupos
+
+🔒 Requiere autenticación.
+
+## Obtener grupos del usuario
+
+### Endpoint
+
+```http
+GET /users/:usuarioId/groups
+```
+
+### Parámetros
+
+| Nombre    | Tipo   |
+| --------- | ------ |
+| usuarioId | number |
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "nombre": "Comidas Italianas",
+      "descripcion": "Recetas de Italia",
+      "receta_count": 12
+    }
+  ]
+}
+```
+
+---
+
+# Recetas
+
+## Obtener detalle de una receta
+
+### Endpoint
+
+```http
+GET /recipes/:recipeId
+```
+
+### Parámetros
+
+| Nombre   | Tipo   |
+| -------- | ------ |
+| recipeId | number |
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 5,
+    "titulo": "Pizza Casera",
+    "descripcion": "Pizza tradicional italiana",
+    "imagen_key": "pizza.jpg",
+    "tiempo_coccion": 30,
+    "dificultad": "Media",
+    "calorias": 600,
+    "porciones": 4,
+    "is_public": true,
+    "usuario_id": 1,
+    "ingredientes": [
+      {
+        "id": 1,
+        "nombre": "Harina",
+        "cantidad": "500g",
+        "orden": 1
+      }
+    ],
+    "pasos": [
+      {
+        "id": 1,
+        "descripcion": "Mezclar ingredientes",
+        "orden": 1
+      }
+    ]
+  }
+}
+```
+
+### Error
+
+```json
+{
+  "success": false,
+  "message": "Receta no encontrada"
+}
+```
+
+---
+
+## Crear receta
+
+🔒 Requiere autenticación.
+
+### Endpoint
+
+```http
+POST /recipes
+```
+
+### Request
+
+```json
+{
+  "titulo": "Pizza Casera",
+  "descripcion": "Pizza italiana",
+  "imagen_key": "pizza.jpg",
+  "tiempo_coccion": 30,
+  "dificultad": "Media",
+  "calorias": 600,
+  "porciones": 4,
+  "is_public": true,
+  "ingredients": [
+    {
+      "nombre": "Harina",
+      "cantidad": "500g"
+    },
+    {
+      "nombre": "Queso",
+      "cantidad": "250g"
+    }
+  ],
+  "steps": [
+    {
+      "descripcion": "Preparar masa"
+    },
+    {
+      "descripcion": "Hornear"
+    }
+  ],
+  "wantsGroup": true,
+  "groupId": 1
+}
+```
+
+### Campos
+
+| Campo          | Tipo    | Requerido |
+| -------------- | ------- | --------- |
+| titulo         | string  | Sí        |
+| descripcion    | string  | Sí        |
+| imagen_key     | string  | Sí        |
+| tiempo_coccion | number  | Sí        |
+| dificultad     | string  | Sí        |
+| calorias       | number  | Sí        |
+| porciones      | number  | Sí        |
+| is_public      | boolean | Sí        |
+| ingredients    | array   | Sí        |
+| steps          | array   | Sí        |
+| wantsGroup     | boolean | No        |
+| groupId        | number  | No        |
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 15,
+    "titulo": "Pizza Casera",
+    "descripcion": "Pizza italiana",
+    "imagen_key": "pizza.jpg",
+    "tiempo_coccion": 30,
+    "dificultad": "Media",
+    "calorias": 600,
+    "porciones": 4,
+    "is_public": true,
+    "usuario_id": 1
+  }
+}
+```
+
+### Error
+
+```json
+{
+  "success": false,
+  "message": "No se pudo crear la receta"
+}
+```
+
+---
+
+## Eliminar receta
+
+🔒 Requiere autenticación.
+
+### Endpoint
+
+```http
+DELETE /recipes/:recipeId
+```
+
+### Parámetros
+
+| Nombre   | Tipo   |
+| -------- | ------ |
+| recipeId | number |
+
+### Ejemplo
+
+```http
+DELETE /recipes/15
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 15
+  }
+}
+```
+
+### Error
+
+```json
+{
+  "success": false,
+  "message": "No se encontró la receta o no pertenece al usuario"
+}
+```
+
+---
+
+# Perfil de Usuario
+
+🔒 Requiere autenticación.
+
+## Actualizar perfil
+
+### Endpoint
+
+```http
+PUT /profile
+```
+
+### Request
+
+```json
+{
+  "nombre": "Juan Perez",
+  "gmail": "juan@gmail.com"
+}
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "nombre": "Juan Perez",
+      "email": "juan@gmail.com",
+      "avatar": null
+    }
+  ]
+}
+```
+
+---
+
+## Actualizar contraseña
+
+🔒 Requiere autenticación.
+
+### Endpoint
+
+```http
+PUT /password
+```
+
+### Request
+
+```json
+{
+  "password": "NuevaPassword123"
+}
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1
+    }
+  ]
+}
+```
+
+### Error
+
+```json
+{
+  "success": false,
+  "message": "No se pudo actualizar la contraseña"
+}
+```
+
+---
+
+# Códigos HTTP utilizados
+
+| Código | Descripción                |
+| ------ | -------------------------- |
+| 200    | Operación exitosa          |
+| 201    | Recurso creado             |
+| 400    | Datos inválidos            |
+| 401    | No autenticado             |
+| 404    | Recurso no encontrado      |
+| 500    | Error interno del servidor |
+
+---
+
+# Modelo de Datos
+
+## Usuario
+
+```json
+{
+  "id": 1,
+  "nombre": "Juan Perez",
+  "gmail": "usuario@gmail.com",
+  "avatar": null
+}
+```
+
+## Receta
+
+```json
+{
+  "id": 1,
+  "titulo": "Pizza Casera",
+  "descripcion": "Pizza italiana",
+  "imagen_key": "pizza.jpg",
+  "tiempo_coccion": 30,
+  "dificultad": "Media",
+  "calorias": 600,
+  "porciones": 4,
+  "is_public": true,
+  "usuario_id": 1
+}
+```
+
+## Ingrediente
+
+```json
+{
+  "id": 1,
+  "nombre": "Harina",
+  "cantidad": "500g",
+  "orden": 1
+}
+```
+
+## Paso
+
+```json
+{
+  "id": 1,
+  "descripcion": "Preparar masa",
+  "orden": 1
+}
+```
+
+## Grupo
+
+```json
+{
+  "id": 1,
+  "nombre": "Comidas Italianas",
+  "descripcion": "Recetas italianas",
+  "receta_count": 12
+}
+```
+
 - `DB_PASSWORD`
 - `DB_PORT`
 - `DB_MAX` (opcional)
@@ -47,149 +1852,604 @@ Variables esperadas en entorno (`.env`):
 
 ## Endpoints HTTP actuales
 
-### 1) Login
+# API de Recetas
 
-`POST /api/login`
+## Base URL
 
-Body JSON:
+```http
+/api/recipes
+```
+
+## Autenticación
+
+Las rutas protegidas requieren una sesión válida generada mediante `login`.
+
+---
+
+# Autenticación
+
+## Login
+
+Inicia sesión y crea una sesión para el usuario.
+
+### Endpoint
+
+```http
+POST /login
+```
+
+### Request
 
 ```json
 {
-	"email": "usuario@correo.com",
-	"password": "123456"
+  "gmail": "usuario@gmail.com",
+  "password": "123456"
 }
 ```
 
-Respuestas comunes:
-
-- `200`: login exitoso, crea sesion.
-- `400`: faltan datos.
-- `401`: usuario no encontrado o contrasena incorrecta.
-
-Ejemplo:
-
-```bash
-curl -X POST http://localhost:5000/api/login \
-	-H "Content-Type: application/json" \
-	-c cookies.txt \
-	-d '{"email":"usuario@correo.com","password":"123456"}'
-```
-
-### 2) Registro
-
-`POST /api/register`
-
-Body JSON:
+### Response
 
 ```json
 {
-	"nombre": "Juan",
-	"email": "juan@correo.com",
-	"password": "123456",
-	"tipo_usuario": 2
+  "success": true,
+  "data": {
+    "id": 1,
+    "nombre": "Juan Perez",
+    "gmail": "usuario@gmail.com",
+    "avatar": null
+  }
 }
 ```
 
-Notas:
-
-- `tipo_usuario` es opcional.
-- Si no se envia, el backend intenta buscar el tipo "Cliente" en base de datos.
-
-Respuestas comunes:
-
-- `200`: usuario creado.
-- `402`: faltan datos requeridos.
-- `500`: error al resolver tipo de usuario por defecto.
-
-Ejemplo:
-
-```bash
-curl -X POST http://localhost:5000/api/register \
-	-H "Content-Type: application/json" \
-	-d '{"nombre":"Juan","email":"juan@correo.com","password":"123456"}'
-```
-
-### 3) Logout
-
-`POST /api/logout`
-
-No requiere body.
-
-Respuestas comunes:
-
-- `200`: sesion cerrada.
-- `500`: error al destruir sesion.
-
-Ejemplo:
-
-```bash
-curl -X POST http://localhost:5000/api/logout \
-	-b cookies.txt
-```
-
-### 4) Ejecutar consulta por nombre
-
-`POST /api/toProccess`
-
-Body JSON:
+### Error
 
 ```json
 {
-	"namequery": "getUsers",
-	"params": {}
+  "success": false,
+  "message": "Credenciales inválidas"
 }
 ```
 
-Respuestas comunes:
+---
 
-- `200`: retorna `{ success: true, data: [...] }`.
-- `500`: error al ejecutar la consulta.
+## Register
 
-Ejemplo:
+Registra un nuevo usuario.
 
-```bash
-curl -X POST http://localhost:5000/api/toProccess \
-	-H "Content-Type: application/json" \
-	-b cookies.txt \
-	-d '{"namequery":"getNotasByUsuario","params":{"usuario_id":1}}'
+### Endpoint
+
+```http
+POST /register
 ```
 
-## `namequery` disponibles en `/api/toProccess`
-
-Estas consultas salen de `backend/data/query.json`:
-
-- `getUsers`
-- `getUser` (params: `gmail`)
-- `getUserById` (params: `id`)
-- `createUser` (params: `nombre`, `gmail`, `password`)
-- `updateUser` (params: `nombre`, `gmail`, `password`, `id`)
-- `deleteUser` (params: `id`)
-- `getNotas`
-- `getNotaById` (params: `id`)
-- `getNotasByUsuario` (params: `usuario_id`)
-- `createNota` (params: `titulo`, `contenido`, `usuario_id`)
-- `updateNota` (params: `titulo`, `contenido`, `usuario_id`, `id`)
-- `deleteNota` (params: `id`)
-
-
-****## Estructura de respuesta (general)
-
-Respuesta exitosa tipica:
+### Request
 
 ```json
 {
-	"success": true,
-	"message": "...",
-	"data": []
+  "nombre": "Juan Perez",
+  "gmail": "usuario@gmail.com",
+  "password": "123456"
 }
 ```
 
-Respuesta de error típica:
+### Response
 
 ```json
 {
-	"success": false,
-	"message": "..."
+  "success": true,
+  "data": {
+    "id": 1,
+    "nombre": "Juan Perez",
+    "email": "usuario@gmail.com",
+    "avatar": null
+  }
 }
 ```
 
+---
+
+## Logout
+
+Finaliza la sesión actual.
+
+### Endpoint
+
+```http
+POST /logout
+```
+
+### Response
+
+```json
+{
+  "success": true
+}
+```
+
+---
+
+# Recetas Públicas
+
+## Obtener recetas públicas
+
+Devuelve todas las recetas marcadas como públicas.
+
+### Endpoint
+
+```http
+GET /public-recipes
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "titulo": "Pizza Casera",
+      "descripcion": "Pizza italiana",
+      "imagen_key": "pizza.jpg",
+      "tiempo_coccion": 30,
+      "dificultad": "Media",
+      "calorias": 600,
+      "porciones": 4,
+      "is_public": true,
+      "usuario_id": 1,
+      "created_at": "2025-01-01T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+# Recetas del Usuario
+
+🔒 Requiere autenticación.
+
+## Obtener recetas de un usuario
+
+### Endpoint
+
+```http
+GET /users/:usuarioId/recipes
+```
+
+### Parámetros
+
+| Nombre    | Tipo   | Descripción    |
+| --------- | ------ | -------------- |
+| usuarioId | number | ID del usuario |
+
+### Ejemplo
+
+```http
+GET /users/1/recipes
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "titulo": "Pizza Casera",
+      "descripcion": "Pizza italiana",
+      "imagen_key": "pizza.jpg",
+      "tiempo_coccion": 30,
+      "dificultad": "Media",
+      "calorias": 600,
+      "porciones": 4,
+      "is_public": true,
+      "usuario_id": 1,
+      "created_at": "2025-01-01T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+### Error
+
+```json
+{
+  "success": false,
+  "message": "Usuario inválido"
+}
+```
+
+---
+
+# Grupos
+
+🔒 Requiere autenticación.
+
+## Obtener grupos del usuario
+
+### Endpoint
+
+```http
+GET /users/:usuarioId/groups
+```
+
+### Parámetros
+
+| Nombre    | Tipo   |
+| --------- | ------ |
+| usuarioId | number |
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "nombre": "Comidas Italianas",
+      "descripcion": "Recetas de Italia",
+      "receta_count": 12
+    }
+  ]
+}
+```
+
+---
+
+# Recetas
+
+## Obtener detalle de una receta
+
+### Endpoint
+
+```http
+GET /recipes/:recipeId
+```
+
+### Parámetros
+
+| Nombre   | Tipo   |
+| -------- | ------ |
+| recipeId | number |
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 5,
+    "titulo": "Pizza Casera",
+    "descripcion": "Pizza tradicional italiana",
+    "imagen_key": "pizza.jpg",
+    "tiempo_coccion": 30,
+    "dificultad": "Media",
+    "calorias": 600,
+    "porciones": 4,
+    "is_public": true,
+    "usuario_id": 1,
+    "ingredientes": [
+      {
+        "id": 1,
+        "nombre": "Harina",
+        "cantidad": "500g",
+        "orden": 1
+      }
+    ],
+    "pasos": [
+      {
+        "id": 1,
+        "descripcion": "Mezclar ingredientes",
+        "orden": 1
+      }
+    ]
+  }
+}
+```
+
+### Error
+
+```json
+{
+  "success": false,
+  "message": "Receta no encontrada"
+}
+```
+
+---
+
+## Crear receta
+
+🔒 Requiere autenticación.
+
+### Endpoint
+
+```http
+POST /recipes
+```
+
+### Request
+
+```json
+{
+  "titulo": "Pizza Casera",
+  "descripcion": "Pizza italiana",
+  "imagen_key": "pizza.jpg",
+  "tiempo_coccion": 30,
+  "dificultad": "Media",
+  "calorias": 600,
+  "porciones": 4,
+  "is_public": true,
+  "ingredients": [
+    {
+      "nombre": "Harina",
+      "cantidad": "500g"
+    },
+    {
+      "nombre": "Queso",
+      "cantidad": "250g"
+    }
+  ],
+  "steps": [
+    {
+      "descripcion": "Preparar masa"
+    },
+    {
+      "descripcion": "Hornear"
+    }
+  ],
+  "wantsGroup": true,
+  "groupId": 1
+}
+```
+
+### Campos
+
+| Campo          | Tipo    | Requerido |
+| -------------- | ------- | --------- |
+| titulo         | string  | Sí        |
+| descripcion    | string  | Sí        |
+| imagen_key     | string  | Sí        |
+| tiempo_coccion | number  | Sí        |
+| dificultad     | string  | Sí        |
+| calorias       | number  | Sí        |
+| porciones      | number  | Sí        |
+| is_public      | boolean | Sí        |
+| ingredients    | array   | Sí        |
+| steps          | array   | Sí        |
+| wantsGroup     | boolean | No        |
+| groupId        | number  | No        |
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 15,
+    "titulo": "Pizza Casera",
+    "descripcion": "Pizza italiana",
+    "imagen_key": "pizza.jpg",
+    "tiempo_coccion": 30,
+    "dificultad": "Media",
+    "calorias": 600,
+    "porciones": 4,
+    "is_public": true,
+    "usuario_id": 1
+  }
+}
+```
+
+### Error
+
+```json
+{
+  "success": false,
+  "message": "No se pudo crear la receta"
+}
+```
+
+---
+
+## Eliminar receta
+
+🔒 Requiere autenticación.
+
+### Endpoint
+
+```http
+DELETE /recipes/:recipeId
+```
+
+### Parámetros
+
+| Nombre   | Tipo   |
+| -------- | ------ |
+| recipeId | number |
+
+### Ejemplo
+
+```http
+DELETE /recipes/15
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 15
+  }
+}
+```
+
+### Error
+
+```json
+{
+  "success": false,
+  "message": "No se encontró la receta o no pertenece al usuario"
+}
+```
+
+---
+
+# Perfil de Usuario
+
+🔒 Requiere autenticación.
+
+## Actualizar perfil
+
+### Endpoint
+
+```http
+PUT /profile
+```
+
+### Request
+
+```json
+{
+  "nombre": "Juan Perez",
+  "gmail": "juan@gmail.com"
+}
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "nombre": "Juan Perez",
+      "email": "juan@gmail.com",
+      "avatar": null
+    }
+  ]
+}
+```
+
+---
+
+## Actualizar contraseña
+
+🔒 Requiere autenticación.
+
+### Endpoint
+
+```http
+PUT /password
+```
+
+### Request
+
+```json
+{
+  "password": "NuevaPassword123"
+}
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1
+    }
+  ]
+}
+```
+
+### Error
+
+```json
+{
+  "success": false,
+  "message": "No se pudo actualizar la contraseña"
+}
+```
+
+---
+
+# Códigos HTTP utilizados
+
+| Código | Descripción                |
+| ------ | -------------------------- |
+| 200    | Operación exitosa          |
+| 201    | Recurso creado             |
+| 400    | Datos inválidos            |
+| 401    | No autenticado             |
+| 404    | Recurso no encontrado      |
+| 500    | Error interno del servidor |
+
+---
+
+# Modelo de Datos
+
+## Usuario
+
+```json
+{
+  "id": 1,
+  "nombre": "Juan Perez",
+  "gmail": "usuario@gmail.com",
+  "avatar": null
+}
+```
+
+## Receta
+
+```json
+{
+  "id": 1,
+  "titulo": "Pizza Casera",
+  "descripcion": "Pizza italiana",
+  "imagen_key": "pizza.jpg",
+  "tiempo_coccion": 30,
+  "dificultad": "Media",
+  "calorias": 600,
+  "porciones": 4,
+  "is_public": true,
+  "usuario_id": 1
+}
+```
+
+## Ingrediente
+
+```json
+{
+  "id": 1,
+  "nombre": "Harina",
+  "cantidad": "500g",
+  "orden": 1
+}
+```
+
+## Paso
+
+```json
+{
+  "id": 1,
+  "descripcion": "Preparar masa",
+  "orden": 1
+}
+```
+
+## Grupo
+
+```json
+{
+  "id": 1,
+  "nombre": "Comidas Italianas",
+  "descripcion": "Recetas italianas",
+  "receta_count": 12
+}
+```
