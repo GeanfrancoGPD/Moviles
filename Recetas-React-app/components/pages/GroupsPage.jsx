@@ -1,16 +1,25 @@
-import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, Alert } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
-import GroupList from '../molecules/GroupList';
-import { useAuth } from '../context/AuthContext';
+import React, { useState, useCallback } from "react";
+import { View, StyleSheet, TouchableOpacity, Text, Alert } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import GroupList from "../molecules/GroupList";
+import { useAuth } from "../context/AuthContext";
+import { getUserGroups, deleteGroup } from "../../services/api";
 
 //  Sustituir por llamada real al backend
 const getUserGroupsApi = async (userId) => {
-  console.log('Obtener grupos del usuario', userId);
-  return [];
+  console.log("Obtener grupos del usuario", userId);
+  const data = await getUserGroups(userId);
+  return data;
+  // return [
+  //   { id: 1, nombre: "Amigos", descripcion: "Recetas para compartir con amigos" },
+  //   { id: 2, nombre: "Familia", descripcion: "Recetas para la familia" },
+  // ];
 };
+
 const deleteGroupApi = async (groupId, userId, isOwner) => {
-  console.log('Eliminar grupo', groupId, userId, isOwner);
+  console.log("Eliminar grupo", groupId, userId, isOwner);
+  const data = await deleteGroup(groupId);
+  return data;
 };
 
 export default function GroupsPage({ navigation }) {
@@ -35,27 +44,31 @@ export default function GroupsPage({ navigation }) {
     }
   };
 
-  useFocusEffect(useCallback(() => { loadGroups(); }, [user]));
+  useFocusEffect(
+    useCallback(() => {
+      loadGroups();
+    }, [user]),
+  );
 
   const handleDeleteGroup = (group) => {
     Alert.alert(
-      'Eliminar grupo',
+      "Eliminar grupo",
       `¿Eliminar "${group.nombre}"?\n\nLas recetas que te pertenecen NO se eliminarán, solo perderán la asociación.`,
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: "Cancelar", style: "cancel" },
         {
-          text: 'Eliminar',
-          style: 'destructive',
+          text: "Eliminar",
+          style: "destructive",
           onPress: async () => {
             try {
               await deleteGroupApi(group.id, user.id, true);
               setGroups((prev) => prev.filter((g) => g.id !== group.id));
             } catch (error) {
-              Alert.alert('Error', error.message);
+              Alert.alert("Error", error.message);
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -66,12 +79,18 @@ export default function GroupsPage({ navigation }) {
         loading={loading}
         onRefresh={loadGroups}
         onGroupPress={(group) =>
-          navigation.navigate('GroupDetail', { groupId: group.id, groupName: group.nombre })
+          navigation.navigate("GroupDetail", {
+            groupId: group.id,
+            groupName: group.nombre,
+          })
         }
         onGroupDelete={handleDeleteGroup}
         emptyMessage="No tienes grupos. Crea tu primer grupo."
       />
-      <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('CreateGroup')}>
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => navigation.navigate("CreateGroup")}
+      >
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
     </View>
@@ -79,22 +98,22 @@ export default function GroupsPage({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  container: { flex: 1, backgroundColor: "#FFFFFF" },
   fab: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 24,
     right: 24,
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#0B5D3C',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
+    backgroundColor: "#0B5D3C",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 5,
   },
-  fabText: { color: '#FFFFFF', fontSize: 28, fontWeight: '700' },
+  fabText: { color: "#FFFFFF", fontSize: 28, fontWeight: "700" },
 });

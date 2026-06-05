@@ -78,12 +78,6 @@ export async function getPublicRecipes(usuarioId) {
   return data.data || [];
 }
 
-export async function getUserGroups(usuarioId) {
-  console.log("Obteniendo grupos del usuario:", usuarioId);
-  const data = await requestJson(`/users/${usuarioId}/groups`);
-  return data.data || [];
-}
-
 export async function getRecipeById(recipeId) {
   console.log("Obteniendo receta por ID:", recipeId);
   const data = await requestJson(`/recipes/${recipeId}`);
@@ -127,6 +121,69 @@ export async function deleteRecipe(recipeId, usuarioId) {
       method: "DELETE",
     },
   );
+
+  return data.data;
+}
+
+// ========== GRUPOS ==========
+
+export async function getUserGroups(usuarioId) {
+  console.log("Obteniendo grupos del usuario:", usuarioId);
+  const data = await requestJson(`/users/${usuarioId}/groups`);
+  return data.data || [];
+}
+
+export async function createGroup(group) {
+  console.log("Creando grupo:", group);
+
+  const data = await requestJson("/groups", {
+    method: "POST",
+    body: JSON.stringify({
+      nombre: group.nombre,
+      descripcion: group.descripcion || "",
+    }),
+  });
+
+  return data.data;
+}
+
+export async function getGroupRecipes(groupId) {
+  console.log("Obteniendo recetas del grupo:", groupId);
+
+  const data = await requestJson(`/groups/${groupId}/recipes`);
+
+  return data.data || [];
+}
+
+export async function addRecipeToGroup(groupId, recipeId) {
+  console.log("Agregando receta al grupo:", groupId, recipeId);
+
+  const data = await requestJson(`/groups/${groupId}/recipes`, {
+    method: "POST",
+    body: JSON.stringify({
+      recipeId,
+    }),
+  });
+
+  return data.data;
+}
+
+export async function removeRecipeFromGroup(groupId, recipeId) {
+  console.log("Eliminando receta del grupo:", groupId, recipeId);
+
+  const data = await requestJson(`/groups/${groupId}/recipes/${recipeId}`, {
+    method: "DELETE",
+  });
+
+  return data.data;
+}
+
+export async function deleteGroup(groupId) {
+  console.log("Eliminando grupo:", groupId);
+
+  const data = await requestJson(`/groups/${groupId}`, {
+    method: "DELETE",
+  });
 
   return data.data;
 }
