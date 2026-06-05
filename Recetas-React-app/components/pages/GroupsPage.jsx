@@ -1,14 +1,17 @@
 import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, Alert } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import GroupList from '../molecules/GroupList';
 import { useAuth } from '../context/AuthContext';
-import { getUserGroups } from '../../services/api';
 
-const MOCK_GROUPS = [
-  { id: 1, nombre: 'Desayunos Saludables', descripcion: 'Para empezar bien el día', recetaCount: 3 },
-  { id: 2, nombre: 'Cenas Rápidas', descripcion: 'Listas en 30 min o menos', recetaCount: 5 },
-];
+//  Sustituir por llamada real al backend
+const getUserGroupsApi = async (userId) => {
+  console.log('Obtener grupos del usuario', userId);
+  return [];
+};
+const deleteGroupApi = async (groupId, userId, isOwner) => {
+  console.log('Eliminar grupo', groupId, userId, isOwner);
+};
 
 export default function GroupsPage({ navigation }) {
   const { user } = useAuth();
@@ -19,37 +22,37 @@ export default function GroupsPage({ navigation }) {
     setLoading(true);
     try {
       if (!user?.id) {
-        setGroups(MOCK_GROUPS);
+        setGroups([]);
         return;
       }
-
-      const data = await getUserGroups(user.id);
-      setGroups(Array.isArray(data) && data.length > 0 ? data : MOCK_GROUPS);
+      const data = await getUserGroupsApi(user.id);
+      setGroups(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error(error);
-      setGroups(MOCK_GROUPS);
+      setGroups([]);
     } finally {
       setLoading(false);
     }
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      loadGroups();
-    }, [])
-  );
+  useFocusEffect(useCallback(() => { loadGroups(); }, [user]));
 
   const handleDeleteGroup = (group) => {
     Alert.alert(
       'Eliminar grupo',
-      `¿Estás seguro de que quieres eliminar el grupo "${group.nombre}"?`,
+      `¿Eliminar "${group.nombre}"?\n\nLas recetas que te pertenecen NO se eliminarán, solo perderán la asociación.`,
       [
         { text: 'Cancelar', style: 'cancel' },
         {
           text: 'Eliminar',
           style: 'destructive',
-          onPress: () => {
-            setGroups(groups.filter(g => g.id !== group.id));
+          onPress: async () => {
+            try {
+              await deleteGroupApi(group.id, user.id, true);
+              setGroups((prev) => prev.filter((g) => g.id !== group.id));
+            } catch (error) {
+              Alert.alert('Error', error.message);
+            }
           },
         },
       ]
@@ -60,17 +63,38 @@ export default function GroupsPage({ navigation }) {
     <View style={styles.container}>
       <GroupList
         groups={groups}
-        onGroupPress={(group) => navigation.navigate('GroupDetail', { groupId: group.id, groupName: group.nombre })}
+        loading={loading}
+        onRefresh={loadGroups}
+        onGroupPress={(group) =>
+          navigation.navigate('GroupDetail', { groupId: group.id, groupName: group.nombre })
+        }
         onGroupDelete={handleDeleteGroup}
-        emptyMessage="No tienes grupos. ¡Crea tu primer grupo!"
+        emptyMessage="No tienes grupos. Crea tu primer grupo."
       />
+      <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('CreateGroup')}>
+        <Text style={styles.fabText}>+</Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
+  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  fab: {
+    position: 'absolute',
+    bottom: 24,
+    right: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#0B5D3C',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
+  fabText: { color: '#FFFFFF', fontSize: 28, fontWeight: '700' },
 });
