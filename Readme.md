@@ -2063,42 +2063,6 @@ GET /users/1/recipes
 
 ---
 
-# Grupos
-
-🔒 Requiere autenticación.
-
-## Obtener grupos del usuario
-
-### Endpoint
-
-```http
-GET /users/:usuarioId/groups
-```
-
-### Parámetros
-
-| Nombre    | Tipo   |
-| --------- | ------ |
-| usuarioId | number |
-
-### Response
-
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": 1,
-      "nombre": "Comidas Italianas",
-      "descripcion": "Recetas de Italia",
-      "receta_count": 12
-    }
-  ]
-}
-```
-
----
-
 # Recetas
 
 ## Obtener detalle de una receta
@@ -2374,6 +2338,221 @@ PUT /password
 {
   "success": false,
   "message": "No se pudo actualizar la contraseña"
+}
+```
+
+---
+
+# Grupos
+
+🔒 Todos los endpoints requieren autenticación.
+
+Los grupos permiten organizar recetas. Un usuario es propietario de un grupo y puede agregar o quitar recetas del mismo.
+
+---
+
+## Obtener grupos del usuario
+
+### Endpoint
+
+```http
+GET /users/:usuarioId/groups
+```
+
+### Parámetros
+
+| Nombre    | Tipo   | Descripción                              |
+| --------- | ------ | ---------------------------------------- |
+| usuarioId | number | ID del usuario propietario de los grupos |
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "nombre": "Comidas Italianas",
+      "descripcion": "Recetas de Italia",
+      "receta_count": 12
+    }
+  ]
+}
+```
+
+---
+
+## Crear grupo
+
+### Endpoint
+
+```http
+POST /groups
+```
+
+### Body
+
+```json
+{
+  "nombre": "Comidas Italianas",
+  "descripcion": "Recetas típicas italianas"
+}
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "nombre": "Comidas Italianas",
+    "descripcion": "Recetas típicas italianas",
+    "usuario_id": 1
+  }
+}
+```
+
+---
+
+## Obtener recetas de un grupo
+
+### Endpoint
+
+```http
+GET /groups/:groupId/recipes
+```
+
+### Parámetros
+
+| Nombre  | Tipo   | Descripción  |
+| ------- | ------ | ------------ |
+| groupId | number | ID del grupo |
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 10,
+      "titulo": "Pizza Margarita",
+      "descripcion": "Pizza tradicional italiana",
+      "usuario_id": 1
+    }
+  ]
+}
+```
+
+---
+
+## Agregar receta a un grupo
+
+### Endpoint
+
+```http
+POST /groups/:groupId/recipes
+```
+
+### Body
+
+```json
+{
+  "recipeId": 10
+}
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "receta_id": 10,
+    "grupo_id": 1
+  }
+}
+```
+
+---
+
+## Eliminar una receta del grupo
+
+### Endpoint
+
+```http
+DELETE /groups/:groupId/recipes/:recipeId
+```
+
+### Parámetros
+
+| Nombre   | Tipo   | Descripción     |
+| -------- | ------ | --------------- |
+| groupId  | number | ID del grupo    |
+| recipeId | number | ID de la receta |
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "receta_id": 10,
+    "grupo_id": 1
+  }
+}
+```
+
+### Restricciones
+
+- Sólo el propietario del grupo puede eliminar recetas del grupo.
+- La receta no se elimina de la base de datos.
+- Únicamente se elimina la relación entre la receta y el grupo.
+
+---
+
+## Eliminar grupo
+
+### Endpoint
+
+```http
+DELETE /groups/:groupId
+```
+
+### Parámetros
+
+| Nombre  | Tipo   | Descripción  |
+| ------- | ------ | ------------ |
+| groupId | number | ID del grupo |
+
+### Comportamiento
+
+Al eliminar un grupo:
+
+1. Se eliminan todas las recetas pertenecientes al propietario que estén asociadas al grupo.
+2. Las recetas de otros usuarios no se eliminan.
+3. Se elimina el grupo.
+4. Las relaciones en `receta_grupo` se eliminan automáticamente mediante `ON DELETE CASCADE`.
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1
+  }
+}
+```
+
+### Errores
+
+```json
+{
+  "success": false,
+  "message": "No se encontró el grupo o no pertenece al usuario"
 }
 ```
 
