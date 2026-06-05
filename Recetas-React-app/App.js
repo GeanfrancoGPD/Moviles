@@ -7,42 +7,52 @@ import Register from "./components/pages/Register";
 import AddRecipePage from "./components/pages/AddRecipePage";
 import RecipeDetailPage from "./components/pages/RecipeDetailPage";
 import AccountSecurityPage from "./components/pages/AccountSecurityPage";
+import CreateGroupPage from "./components/pages/CreateGroupPage";
+import EditGroupPage from "./components/pages/EditGroupPage";
+import GroupDetailPage from "./components/pages/GroupDetailPage";
 import { AuthProvider } from "./components/context/AuthContext";
 
 const Stack = createStackNavigator();
 
-const linking = {
-  prefixes: ["https://miapp.com", "miapp://"],
-  config: {
-    screens: {
-      Login: "",
-      Home: "home",
-      AddRecipe: "home/add-recipe",
-      RecipeDetail: "home/recipe/:recipeId",
-      AccountSecurity: "home/account-security",
-    },
-  },
-};
+// Comentamos el linking para que no fuerce la pantalla Login
+// const linking = {
+//   prefixes: ["https://miapp.com", "miapp://"],
+//   config: {
+//     screens: {
+//       Login: "",
+//       Home: "home",
+//       AddRecipe: "home/add-recipe",
+//       RecipeDetail: "home/recipe/:recipeId",
+//       AccountSecurity: "home/account-security",
+//       CreateGroup: "home/create-group",
+//       EditGroup: "home/edit-group/:groupId",
+//       GroupDetail: "home/group/:groupId",
+//     },
+//   },
+// };
 
 export default function App() {
   return (
     <AuthProvider>
-      <NavigationContainer linking={linking}>
+      <NavigationContainer>
         <Stack.Navigator
-          initialRouteName="Login"
-          screenOptions={{
-            headerShown: false,
-          }}
+          initialRouteName="Home"
+          screenOptions={{ headerShown: false }}
         >
+          {/* Pantallas de autenticación (aún accesibles si se navega manualmente) */}
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="Register" component={Register} />
+
+          {/* Pantallas principales */}
           <Stack.Screen name="Home" component={BarraNavegacion} />
           <Stack.Screen name="AddRecipe" component={AddRecipePage} />
           <Stack.Screen name="RecipeDetail" component={RecipeDetailPage} />
-          <Stack.Screen
-            name="AccountSecurity"
-            component={AccountSecurityPage}
-          />
+          <Stack.Screen name="AccountSecurity" component={AccountSecurityPage} />
+
+          {/* Pantallas de grupos */}
+          <Stack.Screen name="CreateGroup" component={CreateGroupPage} />
+          <Stack.Screen name="EditGroup" component={EditGroupPage} />
+          <Stack.Screen name="GroupDetail" component={GroupDetailPage} />
         </Stack.Navigator>
       </NavigationContainer>
     </AuthProvider>

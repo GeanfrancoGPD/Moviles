@@ -1,57 +1,56 @@
-// pages/Home.jsx
-import React, { useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
-import { useAuth } from "../context/AuthContext";
-import { getPublicRecipes } from "../../services/api";
-import RecipeCard from "../molecules/RecipeCard";
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { useAuth } from '../context/AuthContext';
+import { getPublicRecipes, toggleLike } from '../../services/api';
+import RecipeCard from '../molecules/RecipeCard';
+import LikeButton from '../atom/LikeButton';
 
 export default function Home({ navigation }) {
   const { user } = useAuth();
   const [recipes, setRecipes] = useState([]);
+  const [likesState, setLikesState] = useState({});
 
-  const sampleRecipes = [
-    { id: 1, titulo: 'Wild Mushroom Risotto', tiempo_coccion: 45, dificultad: 'Intermediate', is_public: true },
-    { id: 2, titulo: 'Mediterranean Zucchini Pasta', tiempo_coccion: 20, dificultad: 'Easy', is_public: true },
-    { id: 3, titulo: 'Honey Glazed Salmon', tiempo_coccion: 25, dificultad: 'Easy', is_public: true },
-  ];
+  const loadRecipes = async () => {
+    try {
+      const data = await getPublicRecipes(user?.id);
+      if (Array.isArray(data)) {
+        setRecipes(data);
+        const initialState = {};
+        data.forEach(recipe => {
+          initialState[recipe.id] = {
+            liked: recipe.is_liked_by_user || false,
+          };
+        });
+        setLikesState(initialState);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useFocusEffect(
     React.useCallback(() => {
-      let active = true;
-
-      const run = async () => {
-        try {
-          const data = await getPublicRecipes(user?.id);
-          if (active) {
-            setRecipes(Array.isArray(data) ? data : []);
-          }
-        } catch (error) {
-          console.error(error);
-        }
-      };
-
-      run();
-
-      return () => {
-        active = false;
-      };
+      loadRecipes();
     }, [user?.id])
   );
 
-  const displayRecipes = recipes.length > 0 ? recipes : sampleRecipes;
+  const handleLikeToggle = async (recipeId, newLiked) => {
+    try {
+      const result = await toggleLike(recipeId, user?.id);
+      setLikesState(prev => ({
+        ...prev,
+        [recipeId]: { liked: result.liked },
+      }));
+    } catch (error) {
+      throw error;
+    }
+  };
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator
-    >
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.heroContainer}>
-        <Image 
-          source={{ uri: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&q=80' }} 
-          style={styles.heroImage} 
-        />
+        <Image source={{ uri: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&q=80' }} style={styles.heroImage} />
         <View style={styles.heroOverlay}>
           <Text style={styles.heroTitle}>Cocinar es convertir ingredientes en momentos inolvidables</Text>
         </View>
@@ -61,46 +60,38 @@ export default function Home({ navigation }) {
         <Text style={styles.sectionTitle}>Personalizado para ti</Text>
       </View>
 
-      <View style={styles.recipeSection}>
-        {displayRecipes.map((item) => (
-          <RecipeCard
-            key={item.id}
-            recipe={{
-              title: item.titulo,
-              time: `${item.tiempo_coccion} mins`,
-              difficulty: item.dificultad,
-              tags: item.is_public ? ['Pública'] : ['Privada'],
-              imageUrl: null,
-            }}
-            onPress={() => navigation.navigate('RecipeDetail', { recipeId: item.id })}
-          />
-        ))}
-      </View>
+      {recipes.map(item => (
+        <RecipeCard
+          key={item.id}
+          recipe={{
+            title: item.titulo,
+            time: `${item.tiempo_coccion} min`,
+            difficulty: item.dificultad,
+            tags: item.is_public ? ['Pública'] : ['Privada'],
+          }}
+          onPress={() => navigation.navigate('RecipeDetail', { recipeId: item.id })}
+          footer={
+            <LikeButton
+              recipeId={item.id}
+              initialLiked={likesState[item.id]?.liked ?? false}
+              onLikeToggle={handleLikeToggle}
+              size="small"
+            />
+          }
+        />
+      ))}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
-  content: {
-    paddingBottom: 120,
-  },
-  heroContainer: { 
-    position: 'relative', 
-    height: 260, 
-    marginBottom: 18 
-  },
-  heroImage: { 
-    width: '100%', 
-    height: '100%', 
-    resizeMode: 'cover' 
-  },
-  heroOverlay: { 
-    position: 'absolute', 
-    left: 16, 
+  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  content: { paddingBottom: 120 },
+  heroContainer: { position: 'relative', height: 260, marginBottom: 18 },
+  heroImage: { width: '100%', height: '100%', resizeMode: 'cover' },
+  heroOverlay: {
+    position: 'absolute',
+    left: 16,
     bottom: 16,
     right: 16,
     backgroundColor: 'rgba(11, 47, 26, 0.42)',
@@ -108,39 +99,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
   },
-  heroKicker: { 
-    color: '#F4C95D', 
-    fontSize: 12, 
-    marginBottom: 6, 
-    fontWeight: '700' 
-  },
-  heroTitle: { 
-    color: '#FFFFFF', 
-    fontSize: 20, 
-    fontWeight: '800',
-    textShadowColor: 'rgba(0,0,0,0.45)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
-  },
-  heroMeta: { 
-    color: '#F2F4F1', 
-    marginTop: 6,
-    fontWeight: '600',
-    textShadowColor: 'rgba(0,0,0,0.35)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  },
-  sectionHeader: { 
-    paddingHorizontal: 16, 
-    marginTop: 8, 
-    marginBottom: 8 
-  },
-  sectionTitle: { 
-    color: '#0B2F1A', 
-    fontSize: 18, 
-    fontWeight: '700' 
-  },
-  recipeSection: {
-    paddingBottom: 24,
-  },
+  heroTitle: { color: '#FFFFFF', fontSize: 20, fontWeight: '800', textShadowColor: 'rgba(0,0,0,0.45)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 3 },
+  sectionHeader: { paddingHorizontal: 16, marginTop: 8, marginBottom: 8 },
+  sectionTitle: { color: '#0B2F1A', fontSize: 18, fontWeight: '700' },
 });
