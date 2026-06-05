@@ -68,6 +68,64 @@ class RecipeRepository {
 
     return result.length > 0;
   }
+
+  async createGroup(group) {
+    return await db.excecuteNameQuery("createGroup", group);
+  }
+
+  async getUserGroups(usuario_id) {
+    return await db.excecuteNameQuery("getUserGroups", { usuario_id });
+  }
+
+  async getGroupRecipes(grupo_id) {
+    return await db.excecuteNameQuery("getGroupRecipes", { grupo_id });
+  }
+
+  async getGroupById(id) {
+    return await db.excecuteNameQuery("getGroupById", { id });
+  }
+
+  async deleteGroup(id, usuario_id) {
+    return await db.excecuteNameQuery("deleteGroup", { id, usuario_id });
+  }
+
+  async removeRecipeFromGroup(grupo_id, receta_id, usuario_id) {
+    // Verificar que el usuario es dueño del grupo
+    const group = await this.getGroupById(grupo_id);
+    if (!group || group.usuario_id !== usuario_id) {
+      return {
+        success: false,
+        message: "No tienes permiso para modificar este grupo",
+      };
+    }
+
+    return await db.excecuteNameQuery("removeRecipeFromGroup", {
+      grupo_id,
+      receta_id,
+    });
+  }
+
+  async removeRecipesAllFromGroup(grupo_id, usuario_id) {
+    // Verificar que el usuario es dueño del grupo
+    const group = await this.getGroupById(grupo_id);
+    if (!group || group.usuario_id !== usuario_id) {
+      return {
+        success: false,
+        message: "No tienes permiso para modificar este grupo",
+      };
+    }
+
+    return await db.excecuteNameQuery("removeRecipesAllFromGroup", {
+      grupo_id,
+    });
+  }
+
+  async deleteOwnedRecipesFromGroup(grupo_id, usuario_id) {
+    return await db.excecuteNameQuery("deleteOwnedRecipesFromGroup", {
+      grupo_id,
+      usuario_id,
+    });
+  }
 }
 
 export default new RecipeRepository();

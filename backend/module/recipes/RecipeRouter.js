@@ -55,7 +55,10 @@ router.get("/public-recipes", async (req, res) => {
     const data = await recipeRepository.getPublicRecipes();
     return res.json({ success: true, data: data ?? [] });
   } catch (error) {
-    return res.status(500).json({ success: false, message: "No se pudieron cargar las recetas públicas" });
+    return res.status(500).json({
+      success: false,
+      message: "No se pudieron cargar las recetas públicas",
+    });
   }
 });
 
@@ -64,48 +67,46 @@ router.get("/users/:usuarioId/recipes", authMiddleware, async (req, res) => {
     const usuarioId = resolveUserId(req);
 
     if (!usuarioId) {
-      return res.status(400).json({ success: false, message: "Usuario inválido" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Usuario inválido" });
     }
 
     const data = await recipeRepository.getUserRecipes(usuarioId);
     return res.json({ success: true, data: data ?? [] });
   } catch (error) {
-    return res.status(500).json({ success: false, message: "No se pudieron cargar las recetas del usuario" });
+    return res.status(500).json({
+      success: false,
+      message: "No se pudieron cargar las recetas del usuario",
+    });
   }
 });
 
-router.get("/users/:usuarioId/groups", authMiddleware, async (req, res) => {
-  try {
-    const usuarioId = resolveUserId(req);
-
-    if (!usuarioId) {
-      return res.status(400).json({ success: false, message: "Usuario inválido" });
-    }
-
-    const data = await recipeRepository.getUserGroups(usuarioId);
-    return res.json({ success: true, data: data ?? [] });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: "No se pudieron cargar los grupos del usuario" });
-  }
-});
+// endpoint de las recetas
 
 router.get("/recipes/:recipeId", async (req, res) => {
   try {
     const recipeId = Number(req.params.recipeId);
 
     if (!Number.isFinite(recipeId)) {
-      return res.status(400).json({ success: false, message: "Receta inválida" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Receta inválida" });
     }
 
     const data = await buildRecipeDetail(recipeId);
 
     if (!data) {
-      return res.status(404).json({ success: false, message: "Receta no encontrada" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Receta no encontrada" });
     }
 
     return res.json({ success: true, data });
   } catch (error) {
-    return res.status(500).json({ success: false, message: "No se pudo cargar la receta" });
+    return res
+      .status(500)
+      .json({ success: false, message: "No se pudo cargar la receta" });
   }
 });
 
@@ -114,7 +115,9 @@ router.post("/recipes", authMiddleware, async (req, res) => {
     const usuarioId = resolveUserId(req);
 
     if (!usuarioId) {
-      return res.status(400).json({ success: false, message: "Usuario inválido" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Usuario inválido" });
     }
 
     const validation = await recipeBO.validateRecipePayload(req.body);
@@ -141,7 +144,9 @@ router.post("/recipes", authMiddleware, async (req, res) => {
 
     const recipeId = createdRecipe?.[0]?.id;
     if (!recipeId) {
-      return res.status(500).json({ success: false, message: "No se pudo crear la receta" });
+      return res
+        .status(500)
+        .json({ success: false, message: "No se pudo crear la receta" });
     }
 
     for (let index = 0; index < req.body.ingredients.length; index += 1) {
@@ -172,7 +177,9 @@ router.post("/recipes", authMiddleware, async (req, res) => {
 
     return res.status(201).json({ success: true, data: createdRecipe[0] });
   } catch (error) {
-    return res.status(500).json({ success: false, message: "No se pudo crear la receta" });
+    return res
+      .status(500)
+      .json({ success: false, message: "No se pudo crear la receta" });
   }
 });
 
@@ -182,18 +189,25 @@ router.delete("/recipes/:recipeId", authMiddleware, async (req, res) => {
     const usuarioId = resolveUserId(req);
 
     if (!Number.isFinite(recipeId) || !usuarioId) {
-      return res.status(400).json({ success: false, message: "Datos inválidos" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Datos inválidos" });
     }
 
     const deleted = await recipeRepository.deleteRecipe(recipeId, usuarioId);
 
     if (!deleted?.length) {
-      return res.status(404).json({ success: false, message: "No se encontró la receta o no pertenece al usuario" });
+      return res.status(404).json({
+        success: false,
+        message: "No se encontró la receta o no pertenece al usuario",
+      });
     }
 
     return res.json({ success: true, data: deleted[0] });
   } catch (error) {
-    return res.status(500).json({ success: false, message: "No se pudo eliminar la receta" });
+    return res
+      .status(500)
+      .json({ success: false, message: "No se pudo eliminar la receta" });
   }
 });
 
@@ -202,7 +216,9 @@ router.put("/profile", authMiddleware, async (req, res) => {
     const usuarioId = resolveUserId(req);
 
     if (!usuarioId) {
-      return res.status(400).json({ success: false, message: "Usuario inválido" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Usuario inválido" });
     }
 
     const { nombre, gmail } = req.body;
@@ -214,7 +230,9 @@ router.put("/profile", authMiddleware, async (req, res) => {
 
     return res.json({ success: true, data: data ?? [] });
   } catch (error) {
-    return res.status(500).json({ success: false, message: "No se pudo actualizar el perfil" });
+    return res
+      .status(500)
+      .json({ success: false, message: "No se pudo actualizar el perfil" });
   }
 });
 
@@ -223,7 +241,9 @@ router.put("/password", authMiddleware, async (req, res) => {
     const usuarioId = resolveUserId(req);
 
     if (!usuarioId) {
-      return res.status(400).json({ success: false, message: "Usuario inválido" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Usuario inválido" });
     }
 
     const { password } = req.body;
@@ -234,7 +254,242 @@ router.put("/password", authMiddleware, async (req, res) => {
 
     return res.json({ success: true, data: data ?? [] });
   } catch (error) {
-    return res.status(500).json({ success: false, message: "No se pudo actualizar la contraseña" });
+    return res
+      .status(500)
+      .json({ success: false, message: "No se pudo actualizar la contraseña" });
+  }
+});
+
+// grupos de recetas
+router.get("/users/:usuarioId/groups", authMiddleware, async (req, res) => {
+  try {
+    const usuarioId = resolveUserId(req);
+
+    if (!usuarioId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Usuario inválido" });
+    }
+
+    const data = await recipeRepository.getUserGroups(usuarioId);
+    return res.json({ success: true, data: data ?? [] });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "No se pudieron cargar los grupos del usuario",
+    });
+  }
+});
+
+// endpoints de los grupos
+router.post("/groups", authMiddleware, async (req, res) => {
+  try {
+    const usuarioId = resolveUserId(req);
+
+    if (!usuarioId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Debe iniciar sesion" });
+    }
+
+    const { nombre, descripcion } = req.body;
+    const data = await recipeRepository.createGroup({
+      nombre,
+      descripcion,
+      usuario_id: usuarioId,
+    });
+
+    return res.status(201).json({ success: true, data: data?.[0] ?? null });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: "No se pudo crear el grupo" });
+  }
+});
+
+router.get("/groups/:groupId", authMiddleware, async (req, res) => {
+  try {
+    const groupId = Number(req.params.groupId);
+    const usuarioId = resolveUserId(req);
+
+    if (!Number.isFinite(groupId) || !usuarioId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Datos inválidos" });
+    }
+
+    const data = await recipeRepository.getGroupById(groupId, usuarioId);
+    return res.json({ success: true, data: data ?? [] });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "No se pudo cargar el grupo",
+    });
+  }
+});
+
+router.delete("/groups/:groupId", authMiddleware, async (req, res) => {
+  try {
+    const groupId = Number(req.params.groupId);
+    const usuarioId = resolveUserId(req);
+
+    if (!Number.isFinite(groupId) || !usuarioId) {
+      return res.status(400).json({
+        success: false,
+        message: "Datos inválidos",
+      });
+    }
+
+    // Eliminar recetas propias del usuario dentro del grupo
+    await recipeRepository.deleteOwnedRecipesFromGroup(groupId, usuarioId);
+
+    // Eliminar grupo
+    const data = await recipeRepository.deleteGroup(groupId, usuarioId);
+
+    if (!data?.length) {
+      return res.status(404).json({
+        success: false,
+        message: "No se encontró el grupo o no pertenece al usuario",
+      });
+    }
+
+    return res.json({
+      success: true,
+      data: data[0],
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "No se pudo eliminar el grupo",
+    });
+  }
+});
+
+router.delete("/groups/:groupId/recipes", authMiddleware, async (req, res) => {
+  try {
+    const groupId = Number(req.params.groupId);
+    const usuarioId = resolveUserId(req);
+    const { recipeId } = req.body;
+
+    if (!Number.isFinite(groupId) || !usuarioId || !Number.isFinite(recipeId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Datos inválidos" });
+    }
+
+    const data = await recipeRepository.removeRecipeFromGroup({
+      grupo_id: groupId,
+      receta_id: recipeId,
+      usuario_id: usuarioId,
+    });
+
+    if (!data?.length) {
+      return res.status(404).json({
+        success: false,
+        message: "No se encontró la relación o no pertenece al usuario",
+      });
+    }
+
+    return res.json({ success: true, data: data[0] });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "No se pudo eliminar la receta del grupo",
+    });
+  }
+});
+
+router.delete(
+  "/groups/:groupId/recipes/all",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const groupId = Number(req.params.groupId);
+      const usuarioId = resolveUserId(req);
+
+      if (!Number.isFinite(groupId) || !usuarioId) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Datos inválidos" });
+      }
+
+      const data = await recipeRepository.removeRecipesAllFromGroup({
+        grupo_id: groupId,
+        usuario_id: usuarioId,
+      });
+
+      if (!data?.length) {
+        return res.status(404).json({
+          success: false,
+          message: "No se encontró el grupo o no pertenece al usuario",
+        });
+      }
+
+      return res.json({ success: true, data: data[0] });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "No se pudieron eliminar las recetas del grupo",
+      });
+    }
+  },
+);
+
+router.get("/groups/:groupId/recipes", authMiddleware, async (req, res) => {
+  try {
+    const groupId = Number(req.params.groupId);
+    const usuarioId = resolveUserId(req);
+
+    if (!Number.isFinite(groupId) || !usuarioId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Datos inválidos" });
+    }
+
+    const data = await recipeRepository.getGroupRecipes(groupId);
+
+    return res.json({ success: true, data: data ?? [] });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "No se pudieron cargar las recetas del grupo",
+    });
+  }
+});
+
+router.post("/groups/:groupId/recipes", authMiddleware, async (req, res) => {
+  try {
+    const groupId = Number(req.params.groupId);
+    const usuarioId = resolveUserId(req);
+    const { recipeId } = req.body;
+
+    if (!Number.isFinite(groupId) || !usuarioId || !Number.isFinite(recipeId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Datos inválidos" });
+    }
+
+    const data = await recipeRepository.addRecipeToGroup({
+      grupo_id: groupId,
+      receta_id: recipeId,
+      usuario_id: usuarioId,
+    });
+
+    if (!data?.length) {
+      return res.status(404).json({
+        success: false,
+        message: "No se encontró la receta, el grupo o no pertenece al usuario",
+      });
+    }
+
+    return res.status(201).json({ success: true, data: data[0] });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "No se pudo agregar la receta al grupo",
+    });
   }
 });
 

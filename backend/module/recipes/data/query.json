@@ -119,7 +119,17 @@
       "is_public": "boolean",
       "usuario_id": "number"
     },
-    "orderArray": ["titulo", "descripcion", "imagen_key", "tiempo_coccion", "dificultad", "calorias", "porciones", "is_public", "usuario_id"]
+    "orderArray": [
+      "titulo",
+      "descripcion",
+      "imagen_key",
+      "tiempo_coccion",
+      "dificultad",
+      "calorias",
+      "porciones",
+      "is_public",
+      "usuario_id"
+    ]
   },
   "deleteRecipe": {
     "query": "DELETE FROM recetas WHERE id = $1 AND usuario_id = $2 RETURNING id",
@@ -195,5 +205,67 @@
       "grupo_id": "number"
     },
     "orderArray": ["receta_id", "grupo_id"]
+  },
+  "createGroup": {
+    "query": "INSERT INTO grupos (nombre, descripcion, usuario_id) VALUES ($1, $2, $3) RETURNING id, nombre, descripcion, usuario_id",
+    "structure_params": {
+      "nombre": "string",
+      "descripcion": "string",
+      "usuario_id": "number"
+    },
+    "orderArray": ["nombre", "descripcion", "usuario_id"]
+  },
+  "getGroupById": {
+    "query": "SELECT id, nombre, descripcion, usuario_id FROM grupos WHERE id = $1",
+    "structure_params": {
+      "id": "number"
+    },
+    "orderArray": ["id"]
+  },
+  "deleteGroup": {
+    "query": "DELETE FROM grupos WHERE id = $1 AND usuario_id = $2 RETURNING id",
+    "structure_params": {
+      "id": "number",
+      "usuario_id": "number"
+    },
+    "orderArray": ["id", "usuario_id"]
+  },
+  "removeRecipeFromGroup": {
+    "query": "DELETE FROM receta_grupo WHERE receta_id = $1 AND grupo_id = $2 RETURNING receta_id, grupo_id",
+    "structure_params": {
+      "receta_id": "number",
+      "grupo_id": "number"
+    },
+    "orderArray": ["receta_id", "grupo_id"]
+  },
+  "removeRecipesAllFromGroup": {
+    "query": "DELETE FROM receta_grupo WHERE grupo_id = $1 RETURNING receta_id, grupo_id",
+    "structure_params": {
+      "grupo_id": "number"
+    },
+    "orderArray": ["grupo_id"]
+  },
+  "getRecipesByGroupFromUser": {
+    "query": "SELECT r.id FROM recetas r INNER JOIN receta_grupo rg  ON rg.receta_id = r.id WHERE rg.grupo_id = $1 AND r.usuario_id = $2;",
+    "structure_params": {
+      "grupo_id": "number",
+      "usuario_id": "number"
+    },
+    "orderArray": ["grupo_id", "usuario_id"]
+  },
+  "deleteOwnedRecipesFromGroup": {
+    "query": "DELETE FROM recetas r USING receta_grupo rg WHERE r.id = rg.receta_id AND rg.grupo_id = $1 AND r.usuario_id = $2 RETURNING r.id",
+    "structure_params": {
+      "grupo_id": "number",
+      "usuario_id": "number"
+    },
+    "orderArray": ["grupo_id", "usuario_id"]
+  },
+  "getGroupRecipes": {
+    "query": "SELECT r.id, r.titulo, r.descripcion, r.imagen_key, r.tiempo_coccion, r.dificultad, r.calorias, r.porciones, r.is_public, r.usuario_id, r.created_at FROM recetas r INNER JOIN receta_grupo rg ON rg.receta_id = r.id WHERE rg.grupo_id = $1 ORDER BY r.created_at DESC, r.id DESC",
+    "structure_params": {
+      "grupo_id": "number"
+    },
+    "orderArray": ["grupo_id"]
   }
 }
