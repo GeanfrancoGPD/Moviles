@@ -10,27 +10,40 @@ class DB {
 
   async init() {
     try {
+      const isProduction = process.env.NODE_ENV === "production";
+
       this.pool = new Pool({
-        user: process.env.DB_USER,
-        host: process.env.DB_HOST,
-        database: process.env.DB_DATABASE,
-        password: process.env.DB_PASSWORD,
-        port: process.env.DB_PORT,
+        // Si hay DATABASE_URL usa esa, si no, cae en los parámetros sueltos (local)
+        connectionString: process.env.DATABASE_URL,
+        user: !process.env.DATABASE_URL ? process.env.DB_USER : undefined,
+        host: !process.env.DATABASE_URL ? process.env.DB_HOST : undefined,
+        database: !process.env.DATABASE_URL
+          ? process.env.DB_DATABASE
+          : undefined,
+        password: !process.env.DATABASE_URL
+          ? process.env.DB_PASSWORD
+          : undefined,
+        port: !process.env.DATABASE_URL ? process.env.DB_PORT : undefined,
+
         max: process.env.DB_MAX || 20,
         idleTimeoutMillis: process.env.DB_IDLE_TIMEOUT || 30000,
         connectionTimeoutMillis: process.env.DB_CONN_TIMEOUT || 2000,
-        ssl: false,
+
+        // CRUCIAL PARA PRODUCCIÓN:
+        ssl: isProduction
+          ? { rejectUnauthorized: false } // Requerido por la mayoría de proveedores Cloud
+          : false,
       });
+
       const client = await this.pool.connect();
-
       console.log("Base de datos inicializada correctamente");
-      console.log("Conexión exitosa a PostgreSQL");
-
+      console.log(
+        `Conexión exitosa a PostgreSQL (${isProduction ? "Producción" : "Local"})`,
+      );
       client.release();
     } catch (error) {
       console.error("Error al inicializar la base de datos:", error);
     }
-
     this.loadQueries();
   }
 

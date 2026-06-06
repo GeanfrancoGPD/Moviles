@@ -36,7 +36,7 @@ export default function App() {
     <AuthProvider>
       <NavigationContainer>
         <Stack.Navigator
-          initialRouteName="Home"
+          initialRouteName="Login"
           screenOptions={{ headerShown: false }}
         >
           {/* Pantallas de autenticación (aún accesibles si se navega manualmente) */}
@@ -47,7 +47,10 @@ export default function App() {
           <Stack.Screen name="Home" component={BarraNavegacion} />
           <Stack.Screen name="AddRecipe" component={AddRecipePage} />
           <Stack.Screen name="RecipeDetail" component={RecipeDetailPage} />
-          <Stack.Screen name="AccountSecurity" component={AccountSecurityPage} />
+          <Stack.Screen
+            name="AccountSecurity"
+            component={AccountSecurityPage}
+          />
 
           {/* Pantallas de grupos */}
           <Stack.Screen name="CreateGroup" component={CreateGroupPage} />
