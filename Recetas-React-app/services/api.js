@@ -220,7 +220,13 @@ export async function removeRecipeFromGroup(groupId, recipeId) {
   return data.data;
 }
 
-export async function deleteGroup(groupId) {
-  const data = await requestJson(`/groups/${groupId}`, { method: "DELETE" });
+export async function deleteGroup(groupId, deleteUserRecipes = true) {
+  const data = await requestJson(`/groups/${groupId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ deleteUserRecipes }),
+  });
   return data.data;
 }

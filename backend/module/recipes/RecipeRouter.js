@@ -495,7 +495,7 @@ router.delete("/groups/:groupId", authMiddleware, async (req, res) => {
   try {
     const groupId = Number(req.params.groupId);
     const usuarioId = resolveUserId(req);
-    const deleteUserRecipes = req.query.deleteUserRecipes === "true"; // true/false desde query
+    const deleteUserRecipes = req.body.deleteUserRecipes === "true"; // true/false desde query
 
     if (!Number.isFinite(groupId) || !usuarioId) {
       return res
