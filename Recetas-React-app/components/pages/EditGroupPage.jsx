@@ -6,61 +6,127 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import GroupForm from "../molecules/GroupForm";
-
-//  Sustituir por llamada real al backend
-const getGroupByIdApi = async (id) => {
-  console.log("Obtener grupo", id);
-  return { id, nombre: "Grupo ejemplo", descripcion: "Descripción" };
-};
-const updateGroupApi = async (id, data) => {
-  console.log("Actualizar grupo", id, data);
-  return { id, ...data };
-};
+import GroupRecipesList from "../molecules/GroupRecipesList";
+import Button from "../atom/Button";
+import {
+  getGroupById,
+  getGroupRecipes,
+  updateGroup,
+  removeRecipeFromGroup,
+} from "../../services/api";
 
 export default function EditGroupPage({ route, navigation }) {
   const { groupId, group } = route.params;
   const { user } = useAuth();
   const [initialData, setInitialData] = useState(null);
+  const [recipes, setRecipes] = useState([]);
+  const [selectedRecipeIds, setSelectedRecipeIds] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [removing, setRemoving] = useState(false);
+  const [loadingGroup, setLoadingGroup] = useState(true);
 
   useEffect(() => {
     const fetchGroup = async () => {
-      if (group) {
-        setInitialData(group);
-      } else if (groupId) {
-        try {
-          const data = await getGroupByIdApi(groupId);
-          setInitialData(data);
-        } catch {
-          Alert.alert("Error", "No se pudo cargar el grupo");
-          navigation.goBack();
+      try {
+        let nextGroup = group || null;
+        if (!nextGroup && groupId) {
+          nextGroup = await getGroupById(groupId);
         }
+
+        if (nextGroup) {
+          setInitialData(nextGroup);
+        }
+
+        if (groupId) {
+          const groupRecipes = await getGroupRecipes(groupId);
+          setRecipes(Array.isArray(groupRecipes) ? groupRecipes : []);
+        }
+      } catch (error) {
+        console.warn("Error cargando grupo:", error);
+        Alert.alert("Error", "No se pudo cargar el grupo");
+        navigation.goBack();
+      } finally {
+        setLoadingGroup(false);
       }
     };
     fetchGroup();
-  }, []);
+  }, [group, groupId, navigation]);
 
   const handleUpdate = async (data) => {
     if (!user?.id) return;
     setLoading(true);
     try {
-      await updateGroupApi(groupId || group.id, {
+      await updateGroup(groupId || group.id, {
         ...data,
-        usuario_id: user.id,
       });
+
       Alert.alert("Éxito", "Grupo actualizado");
       navigation.goBack();
     } catch (error) {
+      console.warn("Error updating group:", error);
       Alert.alert("Error", error.message);
     } finally {
       setLoading(false);
     }
   };
 
+  const toggleRecipeSelection = (recipeId) => {
+    setSelectedRecipeIds((prev) =>
+      prev.includes(recipeId)
+        ? prev.filter((id) => id !== recipeId)
+        : [...prev, recipeId],
+    );
+  };
+
+  const handleRemoveSelectedRecipes = () => {
+    if (!selectedRecipeIds.length) return;
+
+    Alert.alert(
+      "Sacar del grupo",
+      "¿Deseas sacar las recetas seleccionadas del grupo?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Sacar",
+          onPress: async () => {
+            setRemoving(true);
+            try {
+              await Promise.all(
+                selectedRecipeIds.map((recipeId) =>
+                  removeRecipeFromGroup(groupId || group.id, recipeId),
+                ),
+              );
+              setRecipes((prev) =>
+                prev.filter((recipe) => !selectedRecipeIds.includes(recipe.id)),
+              );
+              setSelectedRecipeIds([]);
+              Alert.alert("Éxito", "Recetas removidas del grupo");
+            } catch (error) {
+              console.warn("Error removiendo recetas del grupo:", error);
+              Alert.alert(
+                "Error",
+                "No se pudieron quitar las recetas seleccionadas",
+              );
+            } finally {
+              setRemoving(false);
+            }
+          },
+        },
+      ],
+    );
+  };
+
+  if (loadingGroup) {
+    return <ActivityIndicator style={styles.loader} color="#0B5D3C" />;
+  }
+
   if (!initialData) return null;
+
+  const isOwner = initialData.usuario_id === user?.id;
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -78,6 +144,29 @@ export default function EditGroupPage({ route, navigation }) {
         onSubmit={handleUpdate}
         submitLabel="Guardar cambios"
         isLoading={loading}
+      />
+
+      <Text style={styles.sectionTitle}>Recetas en este grupo</Text>
+      <Text style={styles.selectionHint}>
+        Mantén presionada una receta para seleccionarla y luego pulsa "Sacar del grupo".
+      </Text>
+      {selectedRecipeIds.length > 0 && (
+        <Button
+          title={`Sacar ${selectedRecipeIds.length} receta${selectedRecipeIds.length > 1 ? 's' : ''}`}
+          onPress={handleRemoveSelectedRecipes}
+          containerStyle={styles.removeSelectedButton}
+          active={true}
+        />
+      )}
+      <GroupRecipesList
+        recipes={recipes}
+        onRecipePress={(recipe) =>
+          navigation.navigate("RecipeDetail", { recipeId: recipe.id })
+        }
+        isOwner={isOwner}
+        selectable={true}
+        selectedIds={selectedRecipeIds}
+        onToggleSelect={toggleRecipeSelection}
       />
     </ScrollView>
   );
@@ -102,4 +191,20 @@ const styles = StyleSheet.create({
   },
   backText: { color: "#0B5D3C", fontSize: 20, fontWeight: "700" },
   title: { fontSize: 24, fontWeight: "700", color: "#0B2F1A" },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#0B2F1A",
+    marginTop: 24,
+    marginBottom: 10,
+  },
+  selectionHint: {
+    color: "#4A6351",
+    fontSize: 14,
+    marginBottom: 10,
+    lineHeight: 20,
+  },
+  removeSelectedButton: {
+    marginBottom: 16,
+  },
 });

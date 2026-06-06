@@ -35,8 +35,12 @@ export default function GroupDetailPage({ route, navigation }) {
   const loadData = async () => {
     setLoading(true);
     try {
-      const nextGroup =
-        preloadedGroup || (groupId ? await getGroupById(groupId) : null);
+      let nextGroup = null;
+      if (preloadedGroup && preloadedGroup.usuario_id != null) {
+        nextGroup = preloadedGroup;
+      } else if (groupId) {
+        nextGroup = await getGroupById(groupId);
+      }
       const nextRecipes =
         Array.isArray(preloadedRecipes) && preloadedRecipes.length >= 0
           ? preloadedRecipes
@@ -47,7 +51,10 @@ export default function GroupDetailPage({ route, navigation }) {
       }
       setRecipes(Array.isArray(nextRecipes) ? nextRecipes : []);
     } catch (error) {
-      Alert.alert("Error", "No se pudieron cargar los datos del grupo");
+      console.warn("Error cargando grupo:", error);
+      // No bloquear la UI: si hay preloadedGroup, úsalo como fallback
+      if (preloadedGroup) setGroup(preloadedGroup);
+      setRecipes(Array.isArray(preloadedRecipes) ? preloadedRecipes : []);
     } finally {
       setLoading(false);
     }
@@ -55,7 +62,11 @@ export default function GroupDetailPage({ route, navigation }) {
 
   useFocusEffect(
     useCallback(() => {
-      if (preloadedGroup && Array.isArray(preloadedRecipes)) {
+      const canUsePreloaded =
+        preloadedGroup && Array.isArray(preloadedRecipes) &&
+        preloadedGroup.usuario_id != null;
+
+      if (canUsePreloaded) {
         setGroup(preloadedGroup);
         setRecipes(preloadedRecipes);
         setLoading(false);
@@ -155,19 +166,47 @@ export default function GroupDetailPage({ route, navigation }) {
       />
 
       <View style={styles.actions}>
-        {isOwner && (
-          <>
-            <Button title="Agregar receta" onPress={handleAddRecipe} />
-            <Button
-              title="Editar grupo"
-              onPress={() =>
-                navigation.navigate("EditGroup", { group, groupId })
+        <Button
+          title="Editar grupo"
+          onPress={async () => {
+            try {
+              let fullGroup = group;
+              if (!fullGroup || fullGroup.usuario_id == null) {
+                if (groupId) {
+                  fullGroup = await getGroupById(groupId);
+                }
               }
-            />
-            <Button title="Eliminar grupo" onPress={handleDeleteGroup} />
-          </>
-        )}
-        {!isOwner && (
+
+              if (fullGroup && fullGroup.usuario_id === user?.id) {
+                navigation.navigate("EditGroup", {
+                  group: fullGroup,
+                  groupId,
+                });
+                return;
+              }
+
+              if (fullGroup && fullGroup.usuario_id != null) {
+                Alert.alert("No autorizado", "Solo el dueño puede editar el grupo");
+                return;
+              }
+
+              navigation.navigate("EditGroup", {
+                group,
+                groupId,
+              });
+            } catch (err) {
+              console.warn("Error preparando edición:", err);
+              navigation.navigate("EditGroup", {
+                group,
+                groupId,
+              });
+            }
+          }}
+        />
+
+        {isOwner ? (
+          <Button title="Eliminar grupo" onPress={handleDeleteGroup} />
+        ) : (
           <Button title="Salir del grupo" onPress={handleDeleteGroup} />
         )}
       </View>
