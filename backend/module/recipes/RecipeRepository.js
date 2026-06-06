@@ -203,6 +203,13 @@ class RecipeRepository {
       receta_id,
     });
   }
+
+  async removeOwnedRecipesFromGroup(groupId, usuarioId) {
+    return await db.excecuteNameQuery("removeOwnedRecipesFromGroup", {
+      group_id: groupId,
+      usuario_id: usuarioId,
+    });
+  }
 }
 
 export default new RecipeRepository();

@@ -334,5 +334,13 @@
   "deleteStepsByRecipe": {
     "query": "DELETE FROM pasos WHERE receta_id = $1",
     "orderArray": ["receta_id"]
+  },
+  "removeOwnedRecipesFromGroup": {
+    "query": "UPDATE recetas SET group_id = NULL WHERE group_id = $1 AND usuario_id = $2 RETURNING id",
+    "structure_params": {
+      "group_id": "number",
+      "usuario_id": "number"
+    },
+    "orderArray": ["group_id", "usuario_id"]
   }
 }
