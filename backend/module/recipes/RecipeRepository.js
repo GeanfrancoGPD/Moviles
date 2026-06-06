@@ -65,7 +65,6 @@ class RecipeRepository {
       "SELECT id FROM recetas WHERE id = $1 AND usuario_id = $2",
       [id, usuario_id],
     );
-
     return result.length > 0;
   }
 
@@ -90,7 +89,6 @@ class RecipeRepository {
   }
 
   async removeRecipeFromGroup(grupo_id, receta_id, usuario_id) {
-    // Verificar que el usuario es dueño del grupo
     const group = await this.getGroupById(grupo_id);
     if (!group || group.usuario_id !== usuario_id) {
       return {
@@ -98,7 +96,6 @@ class RecipeRepository {
         message: "No tienes permiso para modificar este grupo",
       };
     }
-
     return await db.excecuteNameQuery("removeRecipeFromGroup", {
       grupo_id,
       receta_id,
@@ -106,7 +103,6 @@ class RecipeRepository {
   }
 
   async removeRecipesAllFromGroup(grupo_id, usuario_id) {
-    // Verificar que el usuario es dueño del grupo
     const group = await this.getGroupById(grupo_id);
     if (!group || group.usuario_id !== usuario_id) {
       return {
@@ -114,7 +110,6 @@ class RecipeRepository {
         message: "No tienes permiso para modificar este grupo",
       };
     }
-
     return await db.excecuteNameQuery("removeRecipesAllFromGroup", {
       grupo_id,
     });
@@ -125,6 +120,22 @@ class RecipeRepository {
       grupo_id,
       usuario_id,
     });
+  }
+  // ==========  LIKES ==========
+  async getLikeStatus(receta_id, usuario_id) {
+    return await db.excecuteNameQuery("getLikeStatus", { receta_id, usuario_id });
+  }
+
+  async addLike(receta_id, usuario_id) {
+    return await db.excecuteNameQuery("addLike", { receta_id, usuario_id });
+  }
+
+  async removeLike(receta_id, usuario_id) {
+    return await db.excecuteNameQuery("removeLike", { receta_id, usuario_id });
+  }
+
+  async getLikeCount(receta_id) {
+    return await db.excecuteNameQuery("getLikeCount", { receta_id });
   }
 }
 

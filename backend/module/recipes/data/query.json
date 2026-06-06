@@ -268,4 +268,37 @@
     },
     "orderArray": ["grupo_id"]
   }
+
+  ,
+"getLikeStatus": {
+  "query": "SELECT id FROM likes WHERE receta_id = $1 AND usuario_id = $2",
+  "structure_params": {
+    "receta_id": "number",
+    "usuario_id": "number"
+  },
+  "orderArray": ["receta_id", "usuario_id"]
+},
+"addLike": {
+  "query": "INSERT INTO likes (receta_id, usuario_id) VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING id",
+  "structure_params": {
+    "receta_id": "number",
+    "usuario_id": "number"
+  },
+  "orderArray": ["receta_id", "usuario_id"]
+},
+"removeLike": {
+  "query": "DELETE FROM likes WHERE receta_id = $1 AND usuario_id = $2 RETURNING id",
+  "structure_params": {
+    "receta_id": "number",
+    "usuario_id": "number"
+  },
+  "orderArray": ["receta_id", "usuario_id"]
+},
+"getLikeCount": {
+  "query": "SELECT COUNT(*)::int as count FROM likes WHERE receta_id = $1",
+  "structure_params": {
+    "receta_id": "number"
+  },
+  "orderArray": ["receta_id"]
+}
 }
