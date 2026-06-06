@@ -191,6 +191,18 @@ class RecipeRepository {
       return { liked: true };
     }
   }
+
+  async deleteIngredientsByRecipe(receta_id) {
+    return await db.excecuteNameQuery("deleteIngredientsByRecipe", {
+      receta_id,
+    });
+  }
+
+  async deleteStepsByRecipe(receta_id) {
+    return await db.excecuteNameQuery("deleteStepsByRecipe", {
+      receta_id,
+    });
+  }
 }
 
 export default new RecipeRepository();

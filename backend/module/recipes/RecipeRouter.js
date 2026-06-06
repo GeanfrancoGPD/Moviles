@@ -222,34 +222,57 @@ router.put("/recipes/:recipeId", authMiddleware, async (req, res) => {
 
     const updatedRecipeId = updatedRecipe[0].id;
 
-    // Reemplazar ingredientes y pasos
+    console.log("ANTES deleteIngredients");
     await recipeRepository.deleteIngredientsByRecipe(updatedRecipeId);
+    console.log("DESPUES deleteIngredients");
+
+    console.log("ANTES deleteSteps");
     await recipeRepository.deleteStepsByRecipe(updatedRecipeId);
+    console.log("DESPUES deleteSteps");
 
     for (let i = 0; i < req.body.ingredients.length; i++) {
       const ing = req.body.ingredients[i];
+
+      console.log("INSERTANDO INGREDIENTE", i, ing);
+
       await recipeRepository.addIngredient({
         receta_id: updatedRecipeId,
         nombre: ing.nombre,
         cantidad: ing.cantidad,
         orden: i + 1,
       });
+
+      console.log("INGREDIENTE INSERTADO", i);
     }
 
     for (let i = 0; i < req.body.steps.length; i++) {
       const step = req.body.steps[i];
+
+      console.log("INSERTANDO PASO", i, step);
+
       await recipeRepository.addStep({
         receta_id: updatedRecipeId,
         descripcion: step.descripcion,
         orden: i + 1,
       });
+
+      console.log("PASO INSERTADO", i);
     }
 
-    return res.json({ success: true, data: updatedRecipe[0] });
+    return res.json({
+      success: true,
+      data: updatedRecipe[0],
+    });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ success: false, message: "No se pudo actualizar la receta" });
+    console.error("=========== ERROR REAL ===========");
+    console.error(error);
+    console.error(error.message);
+    console.error(error.stack);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 });
 

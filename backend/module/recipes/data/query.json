@@ -326,5 +326,13 @@
       "id",
       "usuario_id"
     ]
+  },
+  "deleteIngredientsByRecipe": {
+    "query": "DELETE FROM ingredientes WHERE receta_id = $1",
+    "orderArray": ["receta_id"]
+  },
+  "deleteStepsByRecipe": {
+    "query": "DELETE FROM pasos WHERE receta_id = $1",
+    "orderArray": ["receta_id"]
   }
 }
