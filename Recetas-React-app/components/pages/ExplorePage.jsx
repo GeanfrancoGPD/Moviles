@@ -2,7 +2,7 @@ import React, { useState, useCallback } from "react";
 import { View, Text, StyleSheet, FlatList, RefreshControl } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
-import { getPublicRecipes, toggleLike } from "../../services/api";
+import { getPublicRecipes, toggleLike, getUserGroups, addRecipeToMultipleGroups } from "../../services/api";
 import Button from "../atom/Button";
 import SearchBar from "../atom/SearchBar";
 import RecipeCard from "../molecules/RecipeCard";
@@ -17,6 +17,7 @@ export default function ExplorePage({ navigation }) {
   const [sortAlphabetically, setSortAlphabetically] = useState(false);
   const [likesState, setLikesState] = useState({});
   const [refreshing, setRefreshing] = useState(false);
+  const [userGroups, setUserGroups] = useState([]);
 
   const loadRecipes = async () => {
     setLoading(true);
@@ -30,6 +31,11 @@ export default function ExplorePage({ navigation }) {
         };
       });
       setLikesState(initialState);
+      
+      if (user?.id) {
+        const groups = await getUserGroups(user.id);
+        setUserGroups(groups);
+      }
     } catch (error) {
       console.error(error);
     } finally {
@@ -40,7 +46,7 @@ export default function ExplorePage({ navigation }) {
   useFocusEffect(
     useCallback(() => {
       loadRecipes();
-    }, []),
+    }, [user?.id])
   );
 
   const handleRefresh = async () => {
@@ -50,33 +56,31 @@ export default function ExplorePage({ navigation }) {
   };
 
   const handleLikeToggle = async (recipeId, newLiked) => {
-    try {
-      const result = await toggleLike(recipeId, user?.id);
-      setLikesState((prev) => ({
-        ...prev,
-        [recipeId]: { liked: result.liked },
-      }));
-    } catch (error) {
-      throw error;
-    }
+    const result = await toggleLike(recipeId, user?.id);
+    setLikesState((prev) => ({
+      ...prev,
+      [recipeId]: { liked: result.liked },
+    }));
+    return result;
+  };
+
+  const handleAddToGroups = async (recipeId, groupIds) => {
+    await addRecipeToMultipleGroups(recipeId, groupIds);
   };
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
   let filteredRecipes = normalizedQuery
     ? recipes.filter((recipe) =>
-        (recipe.titulo || "").toLowerCase().includes(normalizedQuery),
+        (recipe.titulo || "").toLowerCase().includes(normalizedQuery)
       )
     : recipes;
   if (sortAlphabetically) {
     filteredRecipes = [...filteredRecipes].sort((a, b) =>
-      (a.titulo || "").localeCompare(b.titulo || "", "es", {
-        sensitivity: "base",
-      }),
+      (a.titulo || "").localeCompare(b.titulo || "", "es", { sensitivity: "base" })
     );
   }
 
-  if (loading && !refreshing)
-    return <LoadingSpinner message="Cargando recetas..." />;
+  if (loading && !refreshing) return <LoadingSpinner message="Cargando recetas..." />;
 
   return (
     <View style={styles.container}>
@@ -114,17 +118,15 @@ export default function ExplorePage({ navigation }) {
                 recipeId={item.id}
                 initialLiked={likesState[item.id]?.liked ?? false}
                 onLikeToggle={handleLikeToggle}
+                onAddToGroup={handleAddToGroups}
+                userGroups={userGroups}
                 size="small"
               />
             }
           />
         )}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor="#F4C95D"
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#F4C95D" />
         }
         contentContainerStyle={styles.list}
         ListEmptyComponent={
@@ -140,11 +142,7 @@ export default function ExplorePage({ navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFFFFF", paddingTop: 12 },
   searchBar: { marginHorizontal: 16, marginBottom: 8 },
-  buttonContainer: {
-    marginHorizontal: 16,
-    marginBottom: 8,
-    alignSelf: "flex-start",
-  },
+  buttonContainer: { marginHorizontal: 16, marginBottom: 8, alignSelf: "flex-start" },
   list: { paddingVertical: 8 },
   empty: { padding: 40, alignItems: "center" },
   emptyText: { color: "#666", fontSize: 16 },

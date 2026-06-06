@@ -4,23 +4,24 @@ import { login as apiLogin, logout as apiLogout } from "../../services/api";
 
 const AuthContext = createContext();
 
-// Usuario luca (id 7) de tu base de datos
-const MOCK_USER = {
-  id: 7,
-  name: "luca",
-  email: "luca@gmail.com",
-  gmail: "luca@gmail.com",
-  nombre: "luca",
-};
-
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Mock directo
-    setUser(MOCK_USER);
-    setLoading(false);
+    const loadStoredUser = async () => {
+      try {
+        const storedUser = await AsyncStorage.getItem("user");
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+      } catch (error) {
+        console.error("Error loading user:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadStoredUser();
   }, []);
 
   const login = async (gmail, password) => {
@@ -38,10 +39,10 @@ export const AuthProvider = ({ children }) => {
 
   const updateUserSession = async (updatedUser) => {
     setUser((currentUser) => ({ ...currentUser, ...updatedUser }));
-    const currentStored = await AsyncStorage.getItem('user');
+    const currentStored = await AsyncStorage.getItem("user");
     const storedUser = currentStored ? JSON.parse(currentStored) : {};
     const nextUser = { ...storedUser, ...updatedUser };
-    await AsyncStorage.setItem('user', JSON.stringify(nextUser));
+    await AsyncStorage.setItem("user", JSON.stringify(nextUser));
   };
 
   if (loading) return null;
