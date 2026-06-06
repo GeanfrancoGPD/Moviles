@@ -16,6 +16,7 @@ app.use(
       "exp://192.168.100.5:8081",
       "exp://10.147.17.181:8081",
       "exp://192.168.92.181:8081",
+      "exp://172.27.64.181:8081",
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
