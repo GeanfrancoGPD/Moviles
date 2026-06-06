@@ -109,23 +109,31 @@ export async function createRecipe(recipe, usuarioId) {
 }
 
 export async function updateRecipe(recipeId, recipe, usuarioId) {
+  console.log("=== UPDATE RECIPE ===");
+  console.log("recipeId:", recipeId);
+  console.log("usuarioId:", usuarioId);
+
+  const payload = {
+    titulo: recipe.titulo,
+    descripcion: recipe.descripcion || "",
+    imagen_key: recipe.imagen_key || "default",
+    tiempo_coccion: recipe.tiempo_coccion,
+    dificultad: recipe.dificultad,
+    calorias: recipe.calorias,
+    porciones: recipe.porciones,
+    is_public: recipe.is_public,
+    ingredients: recipe.ingredients,
+    steps: recipe.steps,
+    usuario_id: usuarioId,
+  };
+
+  console.log("payload:", JSON.stringify(payload, null, 2));
+
   const data = await requestJson(`/recipes/${recipeId}`, {
     method: "PUT",
-    body: JSON.stringify({
-      titulo: recipe.titulo,
-      descripcion: recipe.descripcion || "",
-      imagen_key: recipe.imagen_key || "default",
-      tiempo_coccion: recipe.tiempo_coccion,
-      dificultad: recipe.dificultad,
-      calorias: recipe.calorias,
-      porciones: recipe.porciones,
-      is_public: recipe.is_public,
-      ingredientes: recipe.ingredients,
-      pasos: recipe.steps,
-
-      usuario_id: usuarioId,
-    }),
+    body: JSON.stringify(payload),
   });
+
   return data.data;
 }
 

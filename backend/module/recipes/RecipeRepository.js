@@ -142,8 +142,14 @@ class RecipeRepository {
   }
 
   async putRecipe(id, usuario_id, recipe) {
-    // Verificar que el usuario es dueño de la receta
+    console.log("=== PUT RECIPE ===");
+    console.log("id:", id);
+    console.log("usuario_id:", usuario_id);
+
     const ownsRecipe = await this.userOwnsRecipe(usuario_id, id);
+
+    console.log("ownsRecipe:", ownsRecipe);
+
     if (!ownsRecipe) {
       return {
         success: false,
@@ -151,10 +157,15 @@ class RecipeRepository {
       };
     }
 
-    return await db.excecuteNameQuery("putRecipe", {
+    const result = await db.excecuteNameQuery("putRecipe", {
       id,
+      usuario_id,
       ...recipe,
     });
+
+    console.log("update result:", result);
+
+    return result;
   }
 
   async toggleLike(recipeId, usuarioId) {
