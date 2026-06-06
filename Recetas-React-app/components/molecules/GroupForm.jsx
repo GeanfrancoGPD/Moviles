@@ -1,33 +1,36 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import Input from '../atom/Inputs';
-import Button from '../atom/Button';
+import React, { useState } from "react";
+import { View, Text, StyleSheet } from "react-native";
+import Input from "../atom/Inputs";
+import Button from "../atom/Button";
 
 export default function GroupForm({
-  initialData = { nombre: '', descripcion: '' },
+  initialData = { nombre: "", descripcion: "" },
   onSubmit,
-  submitLabel = 'Crear grupo',
+  submitLabel = "Crear grupo",
   isLoading = false,
 }) {
   const [nombre, setNombre] = useState(initialData.nombre);
-  const [descripcion, setDescripcion] = useState(initialData.descripcion || '');
-  const [error, setError] = useState('');
+  const [descripcion, setDescripcion] = useState(initialData.descripcion || "");
+  const [error, setError] = useState("");
 
   const handleSubmit = () => {
     if (!nombre.trim()) {
-      setError('El nombre del grupo es obligatorio');
+      setError("El nombre del grupo es obligatorio");
       return;
     }
     if (nombre.length < 3) {
-      setError('El nombre debe tener al menos 3 caracteres');
+      setError("El nombre debe tener al menos 3 caracteres");
       return;
     }
     if (nombre.length > 50) {
-      setError('El nombre no puede exceder 50 caracteres');
+      setError("El nombre no puede exceder 50 caracteres");
       return;
     }
-    setError('');
-    onSubmit({ nombre: nombre.trim(), descripcion: descripcion.trim() || null });
+    setError("");
+    onSubmit({
+      nombre: nombre.trim(),
+      descripcion: descripcion.trim() || null,
+    });
   };
 
   return (
@@ -56,7 +59,7 @@ export default function GroupForm({
 
 const styles = StyleSheet.create({
   container: { gap: 12 },
-  label: { color: '#1F3B2D', fontSize: 14, fontWeight: '600', marginTop: 8 },
-  inputError: { borderColor: '#FF6B6B' },
-  error: { color: '#FF6B6B', fontSize: 12, marginTop: -8 },
+  label: { color: "#1F3B2D", fontSize: 14, fontWeight: "600", marginTop: 8 },
+  inputError: { borderColor: "#FF6B6B" },
+  error: { color: "#FF6B6B", fontSize: 12, marginTop: -8 },
 });

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,107 +7,124 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-} from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
-import { useAuth } from '../context/AuthContext';
-import GroupRecipesList from '../molecules/GroupRecipesList';
-import Button from '../atom/Button';
-
-// ⚠️ Sustituir por llamada real al backend
-const getGroupByIdApi = async (id) => ({
-  id,
-  nombre: 'Mi grupo',
-  descripcion: 'Descripción del grupo',
-  usuario_id: 7,
-});
-const getGroupRecipesApi = async (id) => [];
-const removeRecipeFromGroupApi = async (recipeId, groupId) => {};
-const deleteGroupApi = async (groupId, userId, isOwner) => {};
+} from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { useAuth } from "../context/AuthContext";
+import GroupRecipesList from "../molecules/GroupRecipesList";
+import Button from "../atom/Button";
+import {
+  getGroupById,
+  getGroupRecipes,
+  removeRecipeFromGroup,
+  deleteGroup,
+} from "../../services/api";
 
 export default function GroupDetailPage({ route, navigation }) {
-  const { groupId, groupName } = route.params;
+  const {
+    groupId,
+    groupName,
+    group: preloadedGroup,
+    preloadedRecipes,
+  } = route.params;
   const { user } = useAuth();
-  const [group, setGroup] = useState(null);
-  const [recipes, setRecipes] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [group, setGroup] = useState(preloadedGroup || null);
+  const [recipes, setRecipes] = useState(preloadedRecipes || []);
+  const [loading, setLoading] = useState(!(preloadedGroup && preloadedRecipes));
   const isOwner = group?.usuario_id === user?.id;
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const [groupData, recipesData] = await Promise.all([
-        getGroupByIdApi(groupId),
-        getGroupRecipesApi(groupId),
-      ]);
-      setGroup(groupData);
-      setRecipes(recipesData || []);
+      const nextGroup =
+        preloadedGroup || (groupId ? await getGroupById(groupId) : null);
+      const nextRecipes =
+        Array.isArray(preloadedRecipes) && preloadedRecipes.length >= 0
+          ? preloadedRecipes
+          : await getGroupRecipes(groupId);
+
+      if (nextGroup) {
+        setGroup(nextGroup);
+      }
+      setRecipes(Array.isArray(nextRecipes) ? nextRecipes : []);
     } catch (error) {
-      Alert.alert('Error', 'No se pudieron cargar los datos');
+      Alert.alert("Error", "No se pudieron cargar los datos del grupo");
     } finally {
       setLoading(false);
     }
   };
 
-  useFocusEffect(useCallback(() => { loadData(); }, [groupId]));
+  useFocusEffect(
+    useCallback(() => {
+      if (preloadedGroup && Array.isArray(preloadedRecipes)) {
+        setGroup(preloadedGroup);
+        setRecipes(preloadedRecipes);
+        setLoading(false);
+        return undefined;
+      }
+
+      loadData();
+      return undefined;
+    }, [groupId, preloadedGroup, preloadedRecipes]),
+  );
 
   const handleDeleteGroup = () => {
     Alert.alert(
-      'Eliminar grupo',
+      "Eliminar grupo",
       `¿Estás seguro de que quieres eliminar el grupo "${group?.nombre}"?\n\n${
         isOwner
-          ? 'Las recetas que te pertenecen NO se eliminarán, solo perderán la asociación a este grupo.'
-          : 'Solo serás removido del grupo, las recetas no se verán afectadas.'
+          ? "Las recetas que te pertenecen NO se eliminarán, solo perderán la asociación a este grupo."
+          : "Solo serás removido del grupo, las recetas no se verán afectadas."
       }`,
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: "Cancelar", style: "cancel" },
         {
-          text: 'Eliminar',
-          style: 'destructive',
+          text: "Eliminar",
+          style: "destructive",
           onPress: async () => {
             try {
-              await deleteGroupApi(groupId, user.id, isOwner);
-              Alert.alert('Éxito', 'Grupo eliminado');
+              await deleteGroup(groupId, user.id, isOwner);
+              Alert.alert("Éxito", "Grupo eliminado");
               navigation.goBack();
             } catch (error) {
-              Alert.alert('Error', error.message);
+              Alert.alert("Error", error.message);
             }
           },
         },
-      ]
+      ],
     );
   };
 
   const handleRemoveRecipe = (recipeId) => {
-    Alert.alert(
-      'Quitar receta',
-      '¿Quitar esta receta del grupo?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Quitar',
-          onPress: async () => {
-            try {
-              await removeRecipeFromGroupApi(recipeId, groupId);
-              setRecipes((prev) => prev.filter((r) => r.id !== recipeId));
-            } catch {
-              Alert.alert('Error', 'No se pudo quitar la receta');
-            }
-          },
+    Alert.alert("Quitar receta", "¿Quitar esta receta del grupo?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Quitar",
+        onPress: async () => {
+          try {
+            await removeRecipeFromGroup(groupId, recipeId);
+            setRecipes((prev) => prev.filter((r) => r.id !== recipeId));
+          } catch {
+            Alert.alert("Error", "No se pudo quitar la receta");
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleAddRecipe = () => {
-    navigation.navigate('Explore', { addToGroupId: groupId });
+    navigation.navigate("Explore", { addToGroupId: groupId });
   };
 
-  if (loading) return <ActivityIndicator style={styles.loader} color="#0B5D3C" />;
+  if (loading)
+    return <ActivityIndicator style={styles.loader} color="#0B5D3C" />;
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
           <Text style={styles.backText}>←</Text>
         </TouchableOpacity>
         <Text style={styles.title}>{group?.nombre}</Text>
@@ -122,7 +139,7 @@ export default function GroupDetailPage({ route, navigation }) {
           <Text style={styles.statLabel}>Recetas</Text>
         </View>
         <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{isOwner ? 'Dueño' : 'Miembro'}</Text>
+          <Text style={styles.statNumber}>{isOwner ? "Dueño" : "Miembro"}</Text>
           <Text style={styles.statLabel}>Rol</Text>
         </View>
       </View>
@@ -131,7 +148,7 @@ export default function GroupDetailPage({ route, navigation }) {
       <GroupRecipesList
         recipes={recipes}
         onRecipePress={(recipe) =>
-          navigation.navigate('RecipeDetail', { recipeId: recipe.id })
+          navigation.navigate("RecipeDetail", { recipeId: recipe.id })
         }
         onRemoveFromGroup={isOwner ? handleRemoveRecipe : null}
         isOwner={isOwner}
@@ -144,44 +161,56 @@ export default function GroupDetailPage({ route, navigation }) {
             <Button
               title="Editar grupo"
               onPress={() =>
-                navigation.navigate('EditGroup', { group, groupId })
+                navigation.navigate("EditGroup", { group, groupId })
               }
             />
             <Button title="Eliminar grupo" onPress={handleDeleteGroup} />
           </>
         )}
-        {!isOwner && <Button title="Salir del grupo" onPress={handleDeleteGroup} />}
+        {!isOwner && (
+          <Button title="Salir del grupo" onPress={handleDeleteGroup} />
+        )}
       </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  container: { flex: 1, backgroundColor: "#FFFFFF" },
   content: { padding: 16, paddingBottom: 40 },
-  loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  header: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 12 },
+  loader: { flex: 1, justifyContent: "center", alignItems: "center" },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+    gap: 12,
+  },
   backButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#F3FAF6',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#F3FAF6",
+    justifyContent: "center",
+    alignItems: "center",
   },
-  backText: { color: '#0B5D3C', fontSize: 20, fontWeight: '700' },
-  title: { flex: 1, fontSize: 24, fontWeight: '700', color: '#0B2F1A' },
-  description: { color: '#5E7068', fontSize: 14, marginBottom: 20 },
-  stats: { flexDirection: 'row', gap: 12, marginBottom: 24 },
+  backText: { color: "#0B5D3C", fontSize: 20, fontWeight: "700" },
+  title: { flex: 1, fontSize: 24, fontWeight: "700", color: "#0B2F1A" },
+  description: { color: "#5E7068", fontSize: 14, marginBottom: 20 },
+  stats: { flexDirection: "row", gap: 12, marginBottom: 24 },
   statCard: {
     flex: 1,
-    backgroundColor: '#F7FBF8',
+    backgroundColor: "#F7FBF8",
     borderRadius: 12,
     padding: 12,
-    alignItems: 'center',
+    alignItems: "center",
   },
-  statNumber: { fontSize: 20, fontWeight: '700', color: '#0B2F1A' },
-  statLabel: { fontSize: 12, color: '#5E7068', marginTop: 4 },
-  sectionTitle: { fontSize: 18, fontWeight: '700', color: '#0B2F1A', marginBottom: 12 },
+  statNumber: { fontSize: 20, fontWeight: "700", color: "#0B2F1A" },
+  statLabel: { fontSize: 12, color: "#5E7068", marginTop: 4 },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#0B2F1A",
+    marginBottom: 12,
+  },
   actions: { marginTop: 24, gap: 12 },
 });

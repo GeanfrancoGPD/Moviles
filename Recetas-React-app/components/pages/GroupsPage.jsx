@@ -3,7 +3,11 @@ import { View, StyleSheet, TouchableOpacity, Text, Alert } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import GroupList from "../molecules/GroupList";
 import { useAuth } from "../context/AuthContext";
-import { getUserGroups, deleteGroup } from "../../services/api";
+import {
+  getUserGroups,
+  deleteGroup,
+  getGroupRecipes,
+} from "../../services/api";
 
 //  Sustituir por llamada real al backend
 const getUserGroupsApi = async (userId) => {
@@ -35,7 +39,25 @@ export default function GroupsPage({ navigation }) {
         return;
       }
       const data = await getUserGroupsApi(user.id);
-      setGroups(Array.isArray(data) ? data : []);
+
+      const groupsWithCount = await Promise.all(
+        (Array.isArray(data) ? data : []).map(async (group) => {
+          try {
+            const recipes = await getGroupRecipes(group.id);
+            return {
+              ...group,
+              recetaCount: Array.isArray(recipes) ? recipes.length : 0,
+            };
+          } catch (error) {
+            return {
+              ...group,
+              recetaCount: group.recetaCount ?? 0,
+            };
+          }
+        }),
+      );
+
+      setGroups(groupsWithCount);
     } catch (error) {
       console.error(error);
       setGroups([]);
@@ -78,12 +100,24 @@ export default function GroupsPage({ navigation }) {
         groups={groups}
         loading={loading}
         onRefresh={loadGroups}
-        onGroupPress={(group) =>
-          navigation.navigate("GroupDetail", {
-            groupId: group.id,
-            groupName: group.nombre,
-          })
-        }
+        onGroupPress={async (group) => {
+          try {
+            const recipes = await getGroupRecipes(group.id);
+            navigation.navigate("GroupDetail", {
+              groupId: group.id,
+              groupName: group.nombre,
+              group,
+              preloadedRecipes: Array.isArray(recipes) ? recipes : [],
+            });
+          } catch (error) {
+            navigation.navigate("GroupDetail", {
+              groupId: group.id,
+              groupName: group.nombre,
+              group,
+              preloadedRecipes: [],
+            });
+          }
+        }}
         onGroupDelete={handleDeleteGroup}
         emptyMessage="No tienes grupos. Crea tu primer grupo."
       />

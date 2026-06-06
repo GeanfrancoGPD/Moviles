@@ -126,6 +126,60 @@ class RecipeRepository {
       usuario_id,
     });
   }
+
+  async addLike(recipeId, usuarioId) {
+    return await db.excecuteNameQuery("addLike", {
+      receta_id: recipeId,
+      usuario_id: usuarioId,
+    });
+  }
+
+  async removeLike(recipeId, usuarioId) {
+    return await db.excecuteNameQuery("removeLike", {
+      receta_id: recipeId,
+      usuario_id: usuarioId,
+    });
+  }
+
+  async putRecipe(id, usuario_id, recipe) {
+    // Verificar que el usuario es dueño de la receta
+    const ownsRecipe = await this.userOwnsRecipe(usuario_id, id);
+    if (!ownsRecipe) {
+      return {
+        success: false,
+        message: "No tienes permiso para modificar esta receta",
+      };
+    }
+
+    return await db.excecuteNameQuery("putRecipe", {
+      id,
+      ...recipe,
+    });
+  }
+
+  async toggleLike(recipeId, usuarioId) {
+    // Verificar si ya existe like
+    const existing = await DB.excecuteNameQuery("getLikeStatus", {
+      receta_id: recipeId,
+      usuario_id: usuarioId,
+    });
+
+    if (existing && existing.length > 0) {
+      // Ya tiene like → lo eliminamos
+      await DB.excecuteNameQuery("removeLike", {
+        receta_id: recipeId,
+        usuario_id: usuarioId,
+      });
+      return { liked: false };
+    } else {
+      // No tiene like → lo agregamos
+      await DB.excecuteNameQuery("addLike", {
+        receta_id: recipeId,
+        usuario_id: usuarioId,
+      });
+      return { liked: true };
+    }
+  }
 }
 
 export default new RecipeRepository();

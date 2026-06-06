@@ -1,25 +1,25 @@
 {
   "getUsers": {
-    "query": "SELECT id, nombre, gmail, avatar, created_at, updated_at FROM usuarios ORDER BY id",
+    "query": "SELECT id, nombre, gmail AS gmail, avatar, created_at, updated_at FROM usuarios ORDER BY id",
     "structure_params": {},
     "orderArray": []
   },
   "getUser": {
-    "query": "SELECT id, nombre, gmail, password, avatar FROM usuarios WHERE gmail = $1",
+    "query": "SELECT id, nombre, gmail AS gmail, password, avatar FROM usuarios WHERE gmail = $1",
     "structure_params": {
       "gmail": "string"
     },
     "orderArray": ["gmail"]
   },
   "getUserById": {
-    "query": "SELECT id, nombre, gmail, avatar FROM usuarios WHERE id = $1",
+    "query": "SELECT id, nombre, gmail AS gmail, avatar FROM usuarios WHERE id = $1",
     "structure_params": {
       "id": "number"
     },
     "orderArray": ["id"]
   },
   "createUser": {
-    "query": "INSERT INTO usuarios (nombre, gmail, password) VALUES ($1, $2, $3) RETURNING id, nombre, gmail, avatar",
+    "query": "INSERT INTO usuarios (nombre, gmail, password) VALUES ($1, $2, $3) RETURNING id, nombre, gmail AS email, avatar",
     "structure_params": {
       "nombre": "string",
       "gmail": "string",
@@ -28,7 +28,7 @@
     "orderArray": ["nombre", "gmail", "password"]
   },
   "updateUser": {
-    "query": "UPDATE usuarios SET nombre = $1, gmail = $2, password = $3 WHERE id = $4 RETURNING id, nombre, gmail, avatar",
+    "query": "UPDATE usuarios SET nombre = $1, gmail = $2, password = $3 WHERE id = $4 RETURNING id, nombre, gmail AS email, avatar",
     "structure_params": {
       "nombre": "string",
       "gmail": "string",
@@ -38,7 +38,7 @@
     "orderArray": ["nombre", "gmail", "password", "id"]
   },
   "updateUserProfile": {
-    "query": "UPDATE usuarios SET nombre = $1, gmail = $2 WHERE id = $3 RETURNING id, nombre, gmail, avatar",
+    "query": "UPDATE usuarios SET nombre = $1, gmail = $2 WHERE id = $3 RETURNING id, nombre, gmail AS email, avatar",
     "structure_params": {
       "nombre": "string",
       "gmail": "string",
@@ -55,7 +55,7 @@
     "orderArray": ["password", "id"]
   },
   "deleteUser": {
-    "query": "DELETE FROM usuarios WHERE id = $1 RETURNING id, nombre, gmail",
+    "query": "DELETE FROM usuarios WHERE id = $1 RETURNING id, nombre, gmail AS email",
     "structure_params": {
       "id": "number"
     },
@@ -90,22 +90,21 @@
     "orderArray": ["titulo", "contenido", "usuario_id"]
   },
   "updateNota": {
-    "query": "UPDATE notas SET titulo = $1, contenido = $2 WHERE id = $3 AND usuario_id = $4 RETURNING id, titulo, contenido, usuario_id",
+    "query": "UPDATE notas SET titulo = $1, contenido = $2, usuario_id = $3 WHERE id = $4 RETURNING id, titulo, contenido, usuario_id",
     "structure_params": {
       "titulo": "string",
       "contenido": "string",
-      "id": "number",
-      "usuario_id": "number"
+      "usuario_id": "number",
+      "id": "number"
     },
-    "orderArray": ["titulo", "contenido", "id", "usuario_id"]
+    "orderArray": ["titulo", "contenido", "usuario_id", "id"]
   },
   "deleteNota": {
-    "query": "DELETE FROM notas WHERE id = $1 AND usuario_id = $2 RETURNING id, titulo, contenido, usuario_id",
+    "query": "DELETE FROM notas WHERE id = $1 RETURNING id, titulo, contenido, usuario_id",
     "structure_params": {
-      "id": "number",
-      "usuario_id": "number"
+      "id": "number"
     },
-    "orderArray": ["id", "usuario_id"]
+    "orderArray": ["id"]
   },
   "createRecipe": {
     "query": "INSERT INTO recetas (titulo, descripcion, imagen_key, tiempo_coccion, dificultad, calorias, porciones, is_public, usuario_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, titulo, descripcion, imagen_key, tiempo_coccion, dificultad, calorias, porciones, is_public, usuario_id",
@@ -247,7 +246,7 @@
     "orderArray": ["grupo_id"]
   },
   "getRecipesByGroupFromUser": {
-    "query": "SELECT r.id FROM recetas r INNER JOIN receta_grupo rg ON rg.receta_id = r.id WHERE rg.grupo_id = $1 AND r.usuario_id = $2",
+    "query": "SELECT r.id FROM recetas r INNER JOIN receta_grupo rg  ON rg.receta_id = r.id WHERE rg.grupo_id = $1 AND r.usuario_id = $2;",
     "structure_params": {
       "grupo_id": "number",
       "usuario_id": "number"
@@ -255,7 +254,7 @@
     "orderArray": ["grupo_id", "usuario_id"]
   },
   "deleteOwnedRecipesFromGroup": {
-    "query": "DELETE FROM receta_grupo rg USING recetas r WHERE rg.receta_id = r.id AND rg.grupo_id = $1 AND r.usuario_id = $2 RETURNING rg.receta_id",
+    "query": "DELETE FROM recetas r USING receta_grupo rg WHERE r.id = rg.receta_id AND rg.grupo_id = $1 AND r.usuario_id = $2 RETURNING r.id",
     "structure_params": {
       "grupo_id": "number",
       "usuario_id": "number"
@@ -268,5 +267,64 @@
       "grupo_id": "number"
     },
     "orderArray": ["grupo_id"]
+  },
+
+  "getLikeStatus": {
+    "query": "SELECT id FROM likes WHERE receta_id = $1 AND usuario_id = $2",
+    "structure_params": {
+      "receta_id": "number",
+      "usuario_id": "number"
+    },
+    "orderArray": ["receta_id", "usuario_id"]
+  },
+  "addLike": {
+    "query": "INSERT INTO likes (receta_id, usuario_id) VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING id",
+    "structure_params": {
+      "receta_id": "number",
+      "usuario_id": "number"
+    },
+    "orderArray": ["receta_id", "usuario_id"]
+  },
+  "removeLike": {
+    "query": "DELETE FROM likes WHERE receta_id = $1 AND usuario_id = $2 RETURNING id",
+    "structure_params": {
+      "receta_id": "number",
+      "usuario_id": "number"
+    },
+    "orderArray": ["receta_id", "usuario_id"]
+  },
+  "getLikeCount": {
+    "query": "SELECT COUNT(*)::int as count FROM likes WHERE receta_id = $1",
+    "structure_params": {
+      "receta_id": "number"
+    },
+    "orderArray": ["receta_id"]
+  },
+  "putRecipe": {
+    "query": "UPDATE recetas SET titulo = $1, descripcion = $2, imagen_key = $3, tiempo_coccion = $4, dificultad = $5, calorias = $6, porciones = $7, is_public = $8 WHERE id = $9 AND usuario_id = $10 RETURNING id, titulo, descripcion, imagen_key, tiempo_coccion, dificultad, calorias, porciones, is_public, usuario_id",
+    "structure_params": {
+      "titulo": "string",
+      "descripcion": "string",
+      "imagen_key": "string",
+      "tiempo_coccion": "number",
+      "dificultad": "string",
+      "calorias": "number",
+      "porciones": "number",
+      "is_public": "boolean",
+      "id": "number",
+      "usuario_id": "number"
+    },
+    "orderArray": [
+      "titulo",
+      "descripcion",
+      "imagen_key",
+      "tiempo_coccion",
+      "dificultad",
+      "calorias",
+      "porciones",
+      "is_public",
+      "id",
+      "usuario_id"
+    ]
   }
 }

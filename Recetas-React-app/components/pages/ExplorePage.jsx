@@ -2,11 +2,17 @@ import React, { useState, useCallback } from "react";
 import { View, Text, StyleSheet, FlatList, RefreshControl } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
-import { getPublicRecipes, toggleLike, getUserGroups, addRecipeToMultipleGroups } from "../../services/api";
+import {
+  getPublicRecipes,
+  toggleLike,
+  removeLike,
+  getUserGroups,
+  addRecipeToMultipleGroups,
+} from "../../services/api";
 import Button from "../atom/Button";
 import SearchBar from "../atom/SearchBar";
 import RecipeCard from "../molecules/RecipeCard";
-import LikeButton from "../atom/LikeButton";
+import ButtonLikes from "../atom/LikeButton";
 import LoadingSpinner from "../atom/LoadingSpinner";
 
 export default function ExplorePage({ navigation }) {
@@ -31,7 +37,7 @@ export default function ExplorePage({ navigation }) {
         };
       });
       setLikesState(initialState);
-      
+
       if (user?.id) {
         const groups = await getUserGroups(user.id);
         setUserGroups(groups);
@@ -46,7 +52,7 @@ export default function ExplorePage({ navigation }) {
   useFocusEffect(
     useCallback(() => {
       loadRecipes();
-    }, [user?.id])
+    }, [user?.id]),
   );
 
   const handleRefresh = async () => {
@@ -56,31 +62,50 @@ export default function ExplorePage({ navigation }) {
   };
 
   const handleLikeToggle = async (recipeId, newLiked) => {
-    const result = await toggleLike(recipeId, user?.id);
-    setLikesState((prev) => ({
-      ...prev,
-      [recipeId]: { liked: result.liked },
-    }));
-    return result;
+    try {
+      let result;
+      if (newLiked) {
+        result = await toggleLike(recipeId, user?.id);
+      } else {
+        result = await removeLike(recipeId, user?.id);
+      }
+
+      // El backend ahora devuelve { liked: true/false }
+      const actualLiked = result?.liked ?? newLiked;
+
+      setLikesState((prev) => ({
+        ...prev,
+        [recipeId]: { liked: actualLiked },
+      }));
+
+      return { liked: actualLiked };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   };
 
   const handleAddToGroups = async (recipeId, groupIds) => {
+    // Agregar la receta a múltiples grupos
     await addRecipeToMultipleGroups(recipeId, groupIds);
   };
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
   let filteredRecipes = normalizedQuery
     ? recipes.filter((recipe) =>
-        (recipe.titulo || "").toLowerCase().includes(normalizedQuery)
+        (recipe.titulo || "").toLowerCase().includes(normalizedQuery),
       )
     : recipes;
   if (sortAlphabetically) {
     filteredRecipes = [...filteredRecipes].sort((a, b) =>
-      (a.titulo || "").localeCompare(b.titulo || "", "es", { sensitivity: "base" })
+      (a.titulo || "").localeCompare(b.titulo || "", "es", {
+        sensitivity: "base",
+      }),
     );
   }
 
-  if (loading && !refreshing) return <LoadingSpinner message="Cargando recetas..." />;
+  if (loading && !refreshing)
+    return <LoadingSpinner message="Cargando recetas..." />;
 
   return (
     <View style={styles.container}>
@@ -114,19 +139,22 @@ export default function ExplorePage({ navigation }) {
               navigation.navigate("RecipeDetail", { recipeId: item.id })
             }
             footer={
-              <LikeButton
+              <ButtonLikes
                 recipeId={item.id}
-                initialLiked={likesState[item.id]?.liked ?? false}
-                onLikeToggle={handleLikeToggle}
-                onAddToGroup={handleAddToGroups}
                 userGroups={userGroups}
-                size="small"
+                onAdded={(groupId) => {
+                  console.log(`Receta ${item.id} agregada al grupo ${groupId}`);
+                }}
               />
             }
           />
         )}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#F4C95D" />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor="#F4C95D"
+          />
         }
         contentContainerStyle={styles.list}
         ListEmptyComponent={
@@ -142,7 +170,11 @@ export default function ExplorePage({ navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFFFFF", paddingTop: 12 },
   searchBar: { marginHorizontal: 16, marginBottom: 8 },
-  buttonContainer: { marginHorizontal: 16, marginBottom: 8, alignSelf: "flex-start" },
+  buttonContainer: {
+    marginHorizontal: 16,
+    marginBottom: 8,
+    alignSelf: "flex-start",
+  },
   list: { paddingVertical: 8 },
   empty: { padding: 40, alignItems: "center" },
   emptyText: { color: "#666", fontSize: 16 },

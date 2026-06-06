@@ -76,7 +76,6 @@ class DB {
       const query = queryConfig.query;
       const values = queryConfig.orderArray.map((key) => params[key]);
 
-      console.log("QUERY:", query);
       console.log("VALUES:", values);
       // DEBUG: Esto es lo que realmente ve la base de datos
       // console.log("Enviando a SQL:", query);

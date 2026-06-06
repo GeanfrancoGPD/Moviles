@@ -24,7 +24,9 @@ async function requestJson(path, options = {}) {
   }
 
   if (!response.ok || json.success === false) {
-    throw new Error(json.message || `Error en el servidor (${response.status})`);
+    throw new Error(
+      json.message || `Error en el servidor (${response.status})`,
+    );
   }
 
   return json;
@@ -118,8 +120,9 @@ export async function updateRecipe(recipeId, recipe, usuarioId) {
       calorias: recipe.calorias,
       porciones: recipe.porciones,
       is_public: recipe.is_public,
-      ingredients: recipe.ingredients,
-      steps: recipe.steps,
+      ingredientes: recipe.ingredients,
+      pasos: recipe.steps,
+
       usuario_id: usuarioId,
     }),
   });
@@ -127,9 +130,12 @@ export async function updateRecipe(recipeId, recipe, usuarioId) {
 }
 
 export async function deleteRecipe(recipeId, usuarioId) {
-  const data = await requestJson(`/recipes/${recipeId}?usuarioId=${encodeURIComponent(usuarioId)}`, {
-    method: "DELETE",
-  });
+  const data = await requestJson(
+    `/recipes/${recipeId}?usuarioId=${encodeURIComponent(usuarioId)}`,
+    {
+      method: "DELETE",
+    },
+  );
   return data.data;
 }
 
@@ -139,7 +145,27 @@ export async function toggleLike(recipeId, usuarioId) {
     method: "POST",
     body: JSON.stringify({ usuario_id: usuarioId }),
   });
+  return data; // { success: true, data: { liked: true/false } }
+}
+
+export async function removeLike(recipeId, usuarioId) {
+  const data = await requestJson(`/recipes/${recipeId}/like`, {
+    method: "DELETE",
+    body: JSON.stringify({ usuario_id: usuarioId }),
+  });
   return data.data;
+}
+
+export async function addRecipeToMultipleGroups(recipeId, groupIds) {
+  const results = await Promise.all(
+    groupIds.map((groupId) =>
+      requestJson(`/groups/${groupId}/recipes`, {
+        method: "POST",
+        body: JSON.stringify({ recipeId }),
+      }),
+    ),
+  );
+  return results;
 }
 
 // ========== GRUPOS ==========
@@ -161,12 +187,14 @@ export async function createGroup(group) {
 
 export async function getGroupById(groupId) {
   const data = await requestJson(`/groups/${groupId}`);
-  return data.data;
+  return data.data || data.group || data;
 }
 
 export async function getGroupRecipes(groupId) {
   const data = await requestJson(`/groups/${groupId}/recipes`);
-  return data.data || [];
+  if (Array.isArray(data.data)) return data.data;
+  if (Array.isArray(data.recipes)) return data.recipes;
+  return [];
 }
 
 export async function addRecipeToGroup(groupId, recipeId) {
@@ -175,11 +203,6 @@ export async function addRecipeToGroup(groupId, recipeId) {
     body: JSON.stringify({ recipeId }),
   });
   return data.data;
-}
-
-export async function addRecipeToMultipleGroups(recipeId, groupIds) {
-  const results = await Promise.all(groupIds.map(groupId => addRecipeToGroup(groupId, recipeId)));
-  return results;
 }
 
 export async function removeRecipeFromGroup(groupId, recipeId) {
