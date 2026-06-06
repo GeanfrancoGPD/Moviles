@@ -342,5 +342,13 @@
       "usuario_id": "number"
     },
     "orderArray": ["group_id", "usuario_id"]
+  },
+  "getUserRecipesInGroup": {
+    "query": "SELECT r.id FROM recetas r WHERE r.usuario_id = $1 AND EXISTS ( SELECT 1 FROM receta_grupo rg WHERE rg.receta_id = r.id AND rg.grupo_id = $2 ) AND NOT EXISTS ( SELECT 1 FROM receta_grupo rg2 WHERE rg2.receta_id = r.id AND rg2.grupo_id != $2 );",
+    "structure_params": {
+      "usuario_id": "number",
+      "grupo_id": "number"
+    },
+    "orderArray": ["usuario_id", "grupo_id"]
   }
 }

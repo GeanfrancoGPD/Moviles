@@ -495,33 +495,36 @@ router.delete("/groups/:groupId", authMiddleware, async (req, res) => {
   try {
     const groupId = Number(req.params.groupId);
     const usuarioId = resolveUserId(req);
-    const deleteUserRecipes = req.body.deleteUserRecipes === "true"; // true/false desde query
+    const deleteUserRecipes =
+      req.body.deleteUserRecipes === true ||
+      req.body.deleteUserRecipes === "true";
 
     if (!Number.isFinite(groupId) || !usuarioId) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Datos inválidos" });
+      return res.status(400).json({
+        success: false,
+        message: "Datos inválidos",
+      });
     }
 
-    // 1. Si se pide eliminar las recetas del usuario que están SOLO en este grupo,
-    //    primero obtener esas recetas y borrarlas físicamente.
+    // 1. Obtener recetas del usuario SOLO en este grupo
+    const userRecipesInGroup = await recipeRepository.getUserRecipesInGroup(
+      usuarioId,
+      groupId,
+    );
+
     if (deleteUserRecipes) {
-      const userRecipesInGroup = await recipeRepository.getUserRecipesInGroup(
-        groupId,
-        usuarioId,
-      );
+      // 2A. Eliminar físicamente SOLO recetas del usuario en este grupo
       for (const recipe of userRecipesInGroup) {
-        // Verificar si la receta pertenece a algún otro grupo (opcional, pero si quieres borrar solo si está únicamente en este grupo)
-        // Por simplicidad, asumimos que el usuario eligió eliminar sus recetas asociadas a este grupo.
         await recipeRepository.deleteRecipe(recipe.id, usuarioId);
       }
     } else {
-      // Si no se eliminan las recetas, solo se desvinculan del grupo
+      // 2B. Solo desvincular recetas del grupo
       await recipeRepository.removeOwnedRecipesFromGroup(groupId, usuarioId);
     }
 
-    // 2. Eliminar el grupo
+    // 3. Eliminar grupo
     const deletedGroup = await recipeRepository.deleteGroup(groupId, usuarioId);
+
     if (!deletedGroup?.length) {
       return res.status(404).json({
         success: false,
@@ -529,12 +532,16 @@ router.delete("/groups/:groupId", authMiddleware, async (req, res) => {
       });
     }
 
-    return res.json({ success: true, data: deletedGroup[0] });
+    return res.json({
+      success: true,
+      data: deletedGroup[0],
+    });
   } catch (error) {
     console.error(error);
-    return res
-      .status(500)
-      .json({ success: false, message: "No se pudo eliminar el grupo" });
+    return res.status(500).json({
+      success: false,
+      message: "No se pudo eliminar el grupo",
+    });
   }
 });
 

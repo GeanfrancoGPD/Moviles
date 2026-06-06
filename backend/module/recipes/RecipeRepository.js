@@ -210,6 +210,13 @@ class RecipeRepository {
       usuario_id: usuarioId,
     });
   }
+
+  async getUserRecipesInGroup(usuarioId, groupId) {
+    return await db.excecuteNameQuery("getUserRecipesInGroup", {
+      usuario_id: usuarioId,
+      group_id: groupId,
+    });
+  }
 }
 
 export default new RecipeRepository();
