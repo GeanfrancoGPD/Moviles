@@ -504,7 +504,6 @@ router.delete("/groups/:groupId", authMiddleware, async (req, res) => {
     }
 
     // 1. Si se pide eliminar las recetas del usuario que están SOLO en este grupo,
-    //    primero obtener esas recetas y borrarlas físicamente.
     if (deleteUserRecipes) {
       const userRecipesInGroup = await recipeRepository.getUserRecipesInGroup(
         groupId,
@@ -610,11 +609,13 @@ router.delete(
           .status(400)
           .json({ success: false, message: "Datos inválidos" });
       }
+
       const data = await recipeRepository.removeRecipeFromGroup(
         groupId,
         recipeId,
         usuarioId,
       );
+
       if (!data?.length) {
         return res.status(404).json({
           success: false,
