@@ -610,11 +610,11 @@ router.delete(
           .status(400)
           .json({ success: false, message: "Datos inválidos" });
       }
-      const data = await recipeRepository.removeRecipeFromGroup({
-        grupo_id: groupId,
-        receta_id: recipeId,
-        usuario_id: usuarioId,
-      });
+      const data = await recipeRepository.removeRecipeFromGroup(
+        groupId,
+        recipeId,
+        usuarioId,
+      );
       if (!data?.length) {
         return res.status(404).json({
           success: false,
