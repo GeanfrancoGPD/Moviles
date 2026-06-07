@@ -192,7 +192,7 @@
     "orderArray": ["receta_id"]
   },
   "getUserGroups": {
-    "query": "SELECT g.id, g.nombre, g.descripcion, COUNT(rg.receta_id)::int AS receta_count FROM grupos g LEFT JOIN receta_grupo rg ON rg.grupo_id = g.id WHERE g.usuario_id = $1 GROUP BY g.id ORDER BY g.created_at DESC, g.id DESC",
+    "query": "SELECT g.id, g.nombre, g.descripcion, g.usuario_id, COUNT(rg.receta_id)::int AS receta_count FROM grupos g LEFT JOIN receta_grupo rg ON rg.grupo_id = g.id WHERE g.usuario_id = $1 GROUP BY g.id ORDER BY g.created_at DESC, g.id DESC",
     "structure_params": {
       "usuario_id": "number"
     },
@@ -214,6 +214,16 @@
       "usuario_id": "number"
     },
     "orderArray": ["nombre", "descripcion", "usuario_id"]
+  },
+  "updateGroup": {
+    "query": "UPDATE grupos SET nombre = $1, descripcion = $2 WHERE id = $3 AND usuario_id = $4 RETURNING id, nombre, descripcion, usuario_id",
+    "structure_params": {
+      "nombre": "string",
+      "descripcion": "string",
+      "id": "number",
+      "usuario_id": "number"
+    },
+    "orderArray": ["nombre", "descripcion", "id", "usuario_id"]
   },
   "getGroupById": {
     "query": "SELECT id, nombre, descripcion, usuario_id FROM grupos WHERE id = $1",

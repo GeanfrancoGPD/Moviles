@@ -85,6 +85,21 @@ class RecipeRepository {
     return await db.excecuteNameQuery("getGroupById", { id });
   }
 
+  async updateGroup(id, usuario_id, group) {
+    const groupRows = await this.getGroupById(id);
+    const groupData = Array.isArray(groupRows) ? groupRows[0] : groupRows;
+    if (!groupData || groupData.usuario_id !== usuario_id) {
+      return [];
+    }
+
+    return await db.excecuteNameQuery("updateGroup", {
+      nombre: group.nombre,
+      descripcion: group.descripcion,
+      id,
+      usuario_id,
+    });
+  }
+
   async deleteGroup(id, usuario_id) {
     return await db.excecuteNameQuery("deleteGroup", { id, usuario_id });
   }

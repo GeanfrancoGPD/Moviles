@@ -27,9 +27,14 @@ async function requestJson(path, options = {}) {
   if (!response.ok || json.success === false) {
     // Log details for debugging network/auth failures
     try {
-      console.warn("API error:", { path, status: response.status, json });
+      console.error("API error:", {
+        path,
+        status: response.status,
+        options,
+        json,
+      });
     } catch (e) {
-      console.warn("API error, unable to stringify response");
+      console.error("API error, unable to stringify response");
     }
 
     throw new Error(json.message || `Error en el servidor (${response.status})`);
