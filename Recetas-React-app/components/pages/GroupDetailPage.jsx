@@ -63,8 +63,7 @@ export default function GroupDetailPage({ route, navigation }) {
   useFocusEffect(
     useCallback(() => {
       const canUsePreloaded =
-        preloadedGroup && Array.isArray(preloadedRecipes) &&
-        preloadedGroup.usuario_id != null;
+        preloadedGroup && Array.isArray(preloadedRecipes);
 
       if (canUsePreloaded) {
         setGroup(preloadedGroup);

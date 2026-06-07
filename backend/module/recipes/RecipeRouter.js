@@ -445,7 +445,19 @@ router.put("/groups/:groupId", authMiddleware, async (req, res) => {
   try {
     const groupId = Number(req.params.groupId);
     const usuarioId = resolveUserId(req);
+    console.log("PUT /groups/:groupId", {
+      groupId: req.params.groupId,
+      parsedGroupId: groupId,
+      usuarioId,
+      body: req.body,
+    });
+
     if (!Number.isFinite(groupId) || !usuarioId) {
+      console.error("PUT /groups/:groupId - datos inválidos", {
+        groupId: req.params.groupId,
+        usuarioId,
+        body: req.body,
+      });
       return res
         .status(400)
         .json({ success: false, message: "Datos inválidos" });
@@ -455,7 +467,15 @@ router.put("/groups/:groupId", authMiddleware, async (req, res) => {
       nombre,
       descripcion,
     });
+    console.log("PUT /groups/:groupId result", { data });
+
     if (!data?.length) {
+      console.error("PUT /groups/:groupId - grupo no encontrado o no pertenece", {
+        groupId,
+        usuarioId,
+        body: req.body,
+        data,
+      });
       return res.status(404).json({
         success: false,
         message: "Grupo no encontrado o no te pertenece",
@@ -463,6 +483,11 @@ router.put("/groups/:groupId", authMiddleware, async (req, res) => {
     }
     return res.json({ success: true, data: data[0] });
   } catch (error) {
+    console.error("Error updating group", {
+      error,
+      params: req.params,
+      body: req.body,
+    });
     return res
       .status(500)
       .json({ success: false, message: "No se pudo actualizar el grupo" });
