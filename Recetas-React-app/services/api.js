@@ -32,7 +32,9 @@ async function requestJson(path, options = {}) {
       console.warn("API error, unable to stringify response");
     }
 
-    throw new Error(json.message || `Error en el servidor (${response.status})`);
+    throw new Error(
+      json.message || `Error en el servidor (${response.status})`,
+    );
   }
 
   return json;
@@ -236,23 +238,11 @@ export async function removeRecipeFromGroup(groupId, recipeId) {
   });
   return data.data;
 }
-<<<<<<< HEAD
-export async function deleteGroup(groupId, deleteUserRecipes = true) {
-  const data = await requestJson(`/groups/${groupId}`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      deleteUserRecipes,
-    }),
-=======
 
 export async function deleteGroup(groupId, userId, isOwner = true) {
   const data = await requestJson(`/groups/${groupId}`, {
     method: "DELETE",
     body: JSON.stringify({ userId, isOwner }),
->>>>>>> Luisbranch
   });
 
   return data.data;

@@ -510,6 +510,8 @@ router.delete("/groups/:groupId", authMiddleware, async (req, res) => {
         groupId,
         usuarioId,
       );
+      console.log("====Data Recetas====:", userRecipesInGroup);
+
       for (const recipe of userRecipesInGroup) {
         // Verificar si la receta pertenece a algún otro grupo (opcional, pero si quieres borrar solo si está únicamente en este grupo)
         // Por simplicidad, asumimos que el usuario eligió eliminar sus recetas asociadas a este grupo.
