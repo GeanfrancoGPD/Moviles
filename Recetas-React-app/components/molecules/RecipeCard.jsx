@@ -1,7 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
+import Icon from '../atom/Icon';
 
-export default function RecipeCard({ recipe, onPress, style, footer }) {
+export default function RecipeCard({ recipe, onPress, onLongPress, style, footer, selected }) {
   const {
     title = 'Recipe Title',
     time = '— mins',
@@ -11,7 +12,17 @@ export default function RecipeCard({ recipe, onPress, style, footer }) {
   } = recipe;
 
   return (
-    <TouchableOpacity activeOpacity={0.9} style={[styles.card, style]} onPress={onPress}>
+    <TouchableOpacity
+      activeOpacity={0.9}
+      style={[styles.card, style, selected && styles.selectedCard]}
+      onPress={onPress}
+      onLongPress={onLongPress}
+    >
+      {selected && (
+        <View style={styles.selectedOverlay}>
+          <Icon name="check" size={18} color="#FFFFFF" />
+        </View>
+      )}
       {imageUrl ? (
         <Image source={{ uri: imageUrl }} style={styles.heroImage} />
       ) : (
@@ -73,6 +84,22 @@ const styles = StyleSheet.create({
   },
   placeholderLetter: { fontSize: 28, color: '#2D6A4F', fontWeight: '700' },
   content: { padding: 12 },
+  selectedCard: {
+    borderColor: '#0B5D3C',
+    borderWidth: 2,
+  },
+  selectedOverlay: {
+    position: 'absolute',
+    top: 14,
+    right: 14,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#0B5D3C',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 2,
+  },
   title: {
     color: '#0B2F1A',
     fontSize: 18,

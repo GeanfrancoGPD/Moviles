@@ -4,8 +4,8 @@ import {
   TextInput,
   View,
   TouchableOpacity,
-  Text,
 } from "react-native";
+import SvgIcon from "./SvgIcon";
 
 export default function Input({
   placeholder,
@@ -37,7 +37,12 @@ export default function Input({
           style={styles.iconContainer}
           onPress={() => setIsPasswordVisible(!isPasswordVisible)}
         >
-          <Text style={styles.iconText}>{isPasswordVisible ? "👁️" : "🙈"}</Text>
+          <SvgIcon 
+            nombre={isPasswordVisible ? "eye-open" : "eye-close"}
+            width={20}
+            height={20}
+            color="#666666"
+          />
         </TouchableOpacity>
       )}
     </View>
@@ -67,8 +72,5 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     paddingLeft: 10,
-  },
-  iconText: {
-    fontSize: 18,
   },
 });

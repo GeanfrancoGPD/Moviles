@@ -1,3 +1,4 @@
+// services/api.js
 import { API_URL } from "@env";
 
 const RECIPES_API_URL = `${API_URL}`;
@@ -24,9 +25,14 @@ async function requestJson(path, options = {}) {
   }
 
   if (!response.ok || json.success === false) {
-    throw new Error(
-      json.message || `Error en el servidor (${response.status})`,
-    );
+    // Log details for debugging network/auth failures
+    try {
+      console.warn("API error:", { path, status: response.status, json });
+    } catch (e) {
+      console.warn("API error, unable to stringify response");
+    }
+
+    throw new Error(json.message || `Error en el servidor (${response.status})`);
   }
 
   return json;
@@ -193,6 +199,17 @@ export async function createGroup(group) {
   return data.data;
 }
 
+export async function updateGroup(groupId, group) {
+  const data = await requestJson(`/groups/${groupId}`, {
+    method: "PUT",
+    body: JSON.stringify({
+      nombre: group.nombre,
+      descripcion: group.descripcion || "",
+    }),
+  });
+  return data.data;
+}
+
 export async function getGroupById(groupId) {
   const data = await requestJson(`/groups/${groupId}`);
   return data.data || data.group || data;
@@ -219,6 +236,7 @@ export async function removeRecipeFromGroup(groupId, recipeId) {
   });
   return data.data;
 }
+<<<<<<< HEAD
 export async function deleteGroup(groupId, deleteUserRecipes = true) {
   const data = await requestJson(`/groups/${groupId}`, {
     method: "DELETE",
@@ -228,6 +246,13 @@ export async function deleteGroup(groupId, deleteUserRecipes = true) {
     body: JSON.stringify({
       deleteUserRecipes,
     }),
+=======
+
+export async function deleteGroup(groupId, userId, isOwner = true) {
+  const data = await requestJson(`/groups/${groupId}`, {
+    method: "DELETE",
+    body: JSON.stringify({ userId, isOwner }),
+>>>>>>> Luisbranch
   });
 
   return data.data;

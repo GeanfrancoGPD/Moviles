@@ -8,6 +8,9 @@ export default function GroupRecipesList({
   onRecipePress,
   onRemoveFromGroup,
   isOwner = true,
+  selectable = false,
+  selectedIds = [],
+  onToggleSelect,
 }) {
   if (!recipes || recipes.length === 0) {
     return (
@@ -19,27 +22,37 @@ export default function GroupRecipesList({
 
   return (
     <View style={styles.container}>
-      {recipes.map((recipe) => (
-        <View key={recipe.id} style={styles.recipeWrapper}>
-          <RecipeCard
-            recipe={{
-              title: recipe.titulo,
-              time: `${recipe.tiempo_coccion || 0} min`,
-              difficulty: recipe.dificultad,
-              tags: [recipe.is_public ? 'Pública' : 'Privada'],
-            }}
-            onPress={() => onRecipePress(recipe)}
-          />
-          {isOwner && (
-            <TouchableOpacity
-              style={styles.removeButton}
-              onPress={() => onRemoveFromGroup(recipe.id)}
-            >
-              <Icon name="delete" size={20} color="#FFFFFF" />
-            </TouchableOpacity>
-          )}
-        </View>
-      ))}
+      {recipes.map((recipe) => {
+        const isSelected = selectedIds.includes(recipe.id);
+        return (
+          <View key={recipe.id} style={styles.recipeWrapper}>
+            <RecipeCard
+              recipe={{
+                title: recipe.titulo,
+                time: `${recipe.tiempo_coccion || 0} min`,
+                difficulty: recipe.dificultad,
+                tags: [recipe.is_public ? 'Pública' : 'Privada'],
+              }}
+              onPress={() => {
+                if (selectable && onToggleSelect) {
+                  return onToggleSelect(recipe.id);
+                }
+                return onRecipePress?.(recipe);
+              }}
+              onLongPress={() => onToggleSelect?.(recipe.id)}
+              selected={isSelected}
+            />
+            {isOwner && !selectable && (
+              <TouchableOpacity
+                style={styles.removeButton}
+                onPress={() => onRemoveFromGroup(recipe.id)}
+              >
+                <Icon name="delete" size={20} color="#FFFFFF" />
+              </TouchableOpacity>
+            )}
+          </View>
+        );
+      })}
     </View>
   );
 }

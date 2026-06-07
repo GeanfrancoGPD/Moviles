@@ -60,6 +60,17 @@ export default function AccountSecurityPage({ navigation }) {
     }
   };
 
+  const handleConfirmSaveProfile = () => {
+    Alert.alert(
+      'Confirmar modificación',
+      '¿Seguro que quieres editar usuario y contraseña?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Guardar', onPress: handleSaveProfile },
+      ],
+    );
+  };
+
   const handleSavePassword = async () => {
     try {
       if (!user?.id) {
@@ -89,6 +100,17 @@ export default function AccountSecurityPage({ navigation }) {
       console.error(error);
       Alert.alert('Error', 'No se pudo actualizar la contraseña.');
     }
+  };
+
+  const handleConfirmSavePassword = () => {
+    Alert.alert(
+      'Confirmar modificación',
+      '¿Seguro que quieres modificar la clave?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Guardar', onPress: handleSavePassword },
+      ],
+    );
   };
 
   const handleDeleteAccount = () => {
@@ -136,7 +158,7 @@ export default function AccountSecurityPage({ navigation }) {
           style={styles.input}
         />
 
-        <Button title="Guardar usuario" onPress={handleSaveProfile} />
+        <Button title="Guardar usuario" onPress={handleConfirmSaveProfile} />
       </AccordionSection>
 
       <AccordionSection
@@ -174,7 +196,7 @@ export default function AccountSecurityPage({ navigation }) {
           style={styles.input}
         />
 
-        <Button title="Guardar contraseña" onPress={handleSavePassword} />
+        <Button title="Guardar contraseña" onPress={handleConfirmSavePassword} />
       </AccordionSection>
 
       <View style={styles.deleteBox}>

@@ -27,7 +27,7 @@ const deleteGroupApi = async (groupId, userId, isOwner) => {
 };
 
 export default function GroupsPage({ navigation }) {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -59,7 +59,30 @@ export default function GroupsPage({ navigation }) {
 
       setGroups(groupsWithCount);
     } catch (error) {
-      console.error(error);
+      console.warn(error);
+      // If unauthorized, clear session and send to login
+      if (error && error.message && error.message.toLowerCase().includes("no autorizado")) {
+        Alert.alert(
+          "Sesión inválida",
+          "Tu sesión ha expirado o no estás autorizado. Por favor inicia sesión nuevamente.",
+          [
+            {
+              text: "Aceptar",
+              onPress: async () => {
+                try {
+                  await logout();
+                } catch (e) {
+                  // ignore
+                }
+                navigation.navigate("Login");
+              },
+            },
+          ],
+        );
+        setGroups([]);
+        return;
+      }
+
       setGroups([]);
     } finally {
       setLoading(false);
