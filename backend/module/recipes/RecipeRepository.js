@@ -106,7 +106,8 @@ class RecipeRepository {
 
   async removeRecipeFromGroup(grupo_id, receta_id, usuario_id) {
     // Verificar que el usuario es dueño del grupo
-    const group = await this.getGroupById(grupo_id);
+    const groupResult = await this.getGroupById(grupo_id);
+    const group = groupResult?.[0];
     if (!group || group.usuario_id !== usuario_id) {
       return {
         success: false,
@@ -122,7 +123,8 @@ class RecipeRepository {
 
   async removeRecipesAllFromGroup(grupo_id, usuario_id) {
     // Verificar que el usuario es dueño del grupo
-    const group = await this.getGroupById(grupo_id);
+    const groupResult = await this.getGroupById(grupo_id);
+    const group = groupResult?.[0];
     if (!group || group.usuario_id !== usuario_id) {
       return {
         success: false,
