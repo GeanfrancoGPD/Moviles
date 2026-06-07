@@ -234,6 +234,16 @@ class RecipeRepository {
       group_id: groupId,
     });
   }
+
+  async deleteUserAccount(usuarioId) {
+    return await db.excecuteNameQuery("deleteUserAccount", {
+      id: usuarioId,
+    });
+  }
+
+  async getAllUsers() {
+    return await db.excecuteNameQuery("getAllUsers", {});
+  }
 }
 
 export default new RecipeRepository();
