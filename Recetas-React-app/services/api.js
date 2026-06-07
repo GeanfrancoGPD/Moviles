@@ -1,7 +1,7 @@
 // services/api.js
-import { API_URL } from "@env";
+import { EXPO_PUBLIC_API_URL } from "@env";
 
-const RECIPES_API_URL = `${API_URL}`;
+const RECIPES_API_URL = `${EXPO_PUBLIC_API_URL}`;
 
 async function requestJson(path, options = {}) {
   const response = await fetch(`${RECIPES_API_URL}${path}`, {
